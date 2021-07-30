@@ -83,7 +83,7 @@ begin
 
       // Setup database
       if (AVerbose) then
-        TConsole.Log(Format(RS_SETUP_DATABASE_START, [ADatabaseName]), Info, True);
+        TConsole.Log(Format(RS_SETUP_DATABASE_BEGIN, [ADatabaseName]), Info, True);
 
       LQrySetupDB.SQL.Text :=
         'DROP TABLE IF EXISTS dbo.#Tab_A;';

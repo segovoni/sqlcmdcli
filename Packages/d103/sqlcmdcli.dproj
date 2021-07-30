@@ -101,6 +101,8 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_Keys>CompanyName=;FileDescription=Command Line Interface for SQL Server tests - Debug;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=</VerInfo_Keys>
+        <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
+        <Debugger_RunParams>stressdb -servername:&quot;azure-automation.database.windows.net&quot; -databasename:AdventureWorks2017 -username:sgovoni -password:pdEVHqcx4..BdrUBvHPy2H</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -131,6 +133,9 @@
         <DCCReference Include="..\..\Sources\sqlcmdcli.ResourceStrings.pas"/>
         <DCCReference Include="..\..\Sources\sqlcmdcli.Utils.pas"/>
         <DCCReference Include="..\..\Sources\sqlcmdcli.QueryStore.pas"/>
+        <DCCReference Include="..\..\Sources\sqlcmdcli.StressDB.SchemaExtractor.pas"/>
+        <DCCReference Include="..\..\Sources\sqlcmdcli.StressDB.QueryExecutor.pas"/>
+        <DCCReference Include="..\..\Sources\sqlcmdcli.StressDB.pas"/>
         <RcItem Include="..\..\Resources\sqlcmdcli.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>TEXT</ResourceType>

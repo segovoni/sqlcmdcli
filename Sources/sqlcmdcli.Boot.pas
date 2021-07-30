@@ -15,7 +15,8 @@ uses
   ,sqlcmdcli.Classes
   ,sqlcmdcli.ResourceStrings
   ,sqlcmdcli.CommandOptions
-  ,sqlcmdcli.QueryStore;
+  ,sqlcmdcli.QueryStore
+  ,sqlcmdcli.StressDB;
 
 { TBootCLI }
 
@@ -40,9 +41,45 @@ begin
     end);
   LOption.HasValue := False;
 
+  // Option: servername
+  LOption := TOptionsRegistry.RegisterOption<string>('servername', 's',
+    RS_CMD_SERVERNAME_INFO,
+    procedure(const AValue: string)
+    begin
+      TGlobalOptions.ServerName := AValue;
+    end);
+  LOption.Required := True;
+
+  // Option: databasename
+  LOption := TOptionsRegistry.RegisterOption<string>('databasename', 'd',
+    RS_CMD_DATABASENAME_INFO,
+    procedure(const AValue: string)
+    begin
+      TGlobalOptions.DatabaseName := AValue;
+    end);
+  LOption.Required := True;
+
+  // Option: username
+  LOption := TOptionsRegistry.RegisterOption<string>('username', 'u',
+    RS_CMD_USERNAME_INFO,
+    procedure(const AValue: string)
+    begin
+      TGlobalOptions.UserName := AValue;
+    end);
+  LOption.Required := True;
+
+  // Option: password
+  LOption := TOptionsRegistry.RegisterOption<string>('password', 'p',
+    RS_CMD_PASSWORD_INFO,
+    procedure(const AValue: string)
+    begin
+      TGlobalOptions.Password := AValue;
+    end);
+  LOption.Required := True;
+
   // Operation: Help
 
-  // Command: "help"
+  // Command: help
   LCommand := TOptionsRegistry.RegisterCommand('help', '?',
     RS_CMD_HELP_DESCRIPTION, RS_CMD_HELP_INFO,
     'help <command>');
@@ -61,59 +98,45 @@ begin
 
   // Operation: Query Store Workload
 
-  // Command: "Run"
+  // Command: querystoreworkload
   LCommand := TOptionsRegistry.RegisterCommand('querystoreworkload', 'qsw',
     RS_CMD_QSWORKLOAD_DESCRIPTION, RS_CMD_QSWORKLOAD_INFO,
-    'run -servername:<name> -databasename:<dbname> -username:<name> -password:<password>');
+    'querystoreworkload -servername:<name> -databasename:<dbname> -username:<name> -password:<password>');
   LCommand.Examples.Add('querystoreworkload -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489');
   LCommand.Examples.Add('querystoreworkload -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
   LCommand.Examples.Add('qsw -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
-
-  // Option: "servername"
-  LOption := LCommand.RegisterOption<string>('servername', 's',
-    RS_CMD_QSWORKLOAD_SERVERNAME_INFO,
-    procedure(const AValue: string)
-    begin
-      TQueryStoreWorkloadOptions.ServerName := AValue;
-    end);
-  LOption.Required := True;
-
-  // Option: "databasename"
-  LOption := LCommand.RegisterOption<string>('databasename', 'd',
-    RS_CMD_QSWORKLOAD_DATABASENAME_INFO,
-    procedure(const AValue: string)
-    begin
-      TQueryStoreWorkloadOptions.DatabaseName := AValue;
-    end);
-  LOption.Required := True;
-
-  // Option: "username"
-  LOption := LCommand.RegisterOption<string>('username', 'u',
-    RS_CMD_QSWORKLOAD_USERNAME_INFO,
-    procedure(const AValue: string)
-    begin
-      TQueryStoreWorkloadOptions.UserName := AValue;
-    end);
-  LOption.Required := True;
-
-  // Option: "password"
-  LOption := LCommand.RegisterOption<string>('password', 'p',
-    RS_CMD_QSWORKLOAD_PASSWORD_INFO,
-    procedure(const AValue: string)
-    begin
-      TQueryStoreWorkloadOptions.Password := AValue;
-    end);
-  LOption.Required := True;
 
   TCommandHandler.RegisterCommand('querystoreworkload',
     procedure()
     begin
       TQueryStoreWorkload.Run(
-        TQueryStoreWorkloadOptions.ServerName,
-        TQueryStoreWorkloadOptions.DatabaseName,
-        TQueryStoreWorkloadOptions.UserName,
-        TQueryStoreWorkloadOptions.Password,
+        TGlobalOptions.ServerName,
+        TGlobalOptions.DatabaseName,
+        TGlobalOptions.UserName,
+        TGlobalOptions.Password,
         TGlobalOptions.Verbose);
+    end);
+
+  // Operation: Stress database
+
+  // Command: stressdb
+  LCommand := TOptionsRegistry.RegisterCommand('stressdb', 'sdb',
+    RS_CMD_STRESSDB_DESCRIPTION, RS_CMD_STRESSDB_INFO,
+    'stressdb -servername:<name> -databasename:<dbname> -username:<name> -password:<password>');
+  LCommand.Examples.Add('stressdb -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489');
+  LCommand.Examples.Add('stressdb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+  LCommand.Examples.Add('sdb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+
+  TCommandHandler.RegisterCommand('stressdb',
+    procedure()
+    begin
+      TStressDB.Run(
+        TGlobalOptions.ServerName,
+        TGlobalOptions.DatabaseName,
+        TGlobalOptions.UserName,
+        TGlobalOptions.Password,
+        TGlobalOptions.Verbose,
+        TStressDBOptions.MeltCPU);
     end);
 end;
 
