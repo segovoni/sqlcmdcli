@@ -4,7 +4,7 @@ interface
 
 uses
   ADODB
-  ,sqlcmdcli.StressDB.SchemaExtractor;
+  ,sqlcmdcli.SchemaExtractor;
 
 type
 

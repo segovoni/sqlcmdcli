@@ -1,4 +1,4 @@
-unit sqlcmdcli.StressDB.SchemaExtractor;
+unit sqlcmdcli.SchemaExtractor;
 
 interface
 

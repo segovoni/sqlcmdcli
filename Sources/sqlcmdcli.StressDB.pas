@@ -15,7 +15,7 @@ uses
   Winapi.ActiveX
   ,Data.Win.ADODB
   ,System.SysUtils
-  ,sqlcmdcli.StressDB.SchemaExtractor
+  ,sqlcmdcli.SchemaExtractor
   ,sqlcmdcli.StressDB.QueryExecutor
   ,sqlcmdcli.Console
   ,sqlcmdcli.ResourceStrings;

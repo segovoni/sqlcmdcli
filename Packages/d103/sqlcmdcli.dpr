@@ -22,9 +22,9 @@ uses
   sqlcmdcli.ResourceStrings in '..\..\Sources\sqlcmdcli.ResourceStrings.pas',
   sqlcmdcli.Utils in '..\..\Sources\sqlcmdcli.Utils.pas',
   sqlcmdcli.QueryStore in '..\..\Sources\sqlcmdcli.QueryStore.pas',
-  sqlcmdcli.StressDB.SchemaExtractor in '..\..\Sources\sqlcmdcli.StressDB.SchemaExtractor.pas',
   sqlcmdcli.StressDB.QueryExecutor in '..\..\Sources\sqlcmdcli.StressDB.QueryExecutor.pas',
-  sqlcmdcli.StressDB in '..\..\Sources\sqlcmdcli.StressDB.pas';
+  sqlcmdcli.StressDB in '..\..\Sources\sqlcmdcli.StressDB.pas',
+  sqlcmdcli.SchemaExtractor in '..\..\Sources\sqlcmdcli.SchemaExtractor.pas';
 
 var
   LHeader: string;
