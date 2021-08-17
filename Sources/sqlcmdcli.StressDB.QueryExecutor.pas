@@ -12,9 +12,8 @@ type
   protected
     FConnection: TADOConnection;
     FSchema: TDBSchema;
-    FIndex: TDBSchemaIndex;
   public
-    constructor Create(AConnection: TADOConnection; AIndex: TDBSchemaIndex; ASchema: TDBSchema);
+    constructor Create(AConnection: TADOConnection; ASchema: TDBSchema);
     destructor Destroy; override;
     procedure StressDB(AMeltCPU: Boolean);
   end;
@@ -28,18 +27,14 @@ uses
 
 { TSQLDBQueryExecutor }
 
-constructor TSQLDBQueryExecutor.Create(AConnection: TADOConnection;
-  AIndex: TDBSchemaIndex; ASchema: TDBSchema);
+constructor TSQLDBQueryExecutor.Create(AConnection: TADOConnection; ASchema: TDBSchema);
 begin
   FConnection := AConnection;
-  FIndex := AIndex;
   FSchema := ASchema;
 end;
 
 destructor TSQLDBQueryExecutor.Destroy;
 begin
-  //FIndex.Clear;
-  //FreeAndNil(FIndex);
   //FSchema.Clear;
   //FreeAndNil(FSchema);
 
@@ -48,8 +43,7 @@ end;
 
 procedure TSQLDBQueryExecutor.StressDB(AMeltCPU: Boolean);
 var
-  LIndex: Integer;
-  //LTableName: string;
+  LTableName: string;
   LQry: TADOQuery;
 begin
   // Let's stress the DB!
@@ -60,23 +54,9 @@ begin
   try
     LQry.Connection := FConnection;
 
-    //while (FIndex.Count > 0) do
-    //begin
-    //  LIndex := Random(FSchema.Count);
-    //
-    //  if (FIndex.TryGetValue(LIndex, LTableName)) then
-    //  begin
-    //    LQry.SQL.Text := 'SELECT * FROM ' + LTableName;
-    //    LQry.Open;
-    //    LQry.Close;
-    //    FIndex.Remove(LIndex);
-    //  end;
-    //end;
-
-    //for LIndex := 0 to (FSchema.Count - 1) do
-    for LIndex := 0 to (FIndex.Count - 1) do
+    for LTableName in FSchema.Keys do
     begin
-      LQry.SQL.Text := 'SELECT * FROM ' + FIndex.Items[LIndex];
+      LQry.SQL.Text := 'SELECT * FROM ' + LTableName;
       TConsole.Log(LQry.SQL.Text, Success, False);
       LQry.Open;
       LQry.RecordCount;

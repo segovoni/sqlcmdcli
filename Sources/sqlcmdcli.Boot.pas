@@ -16,7 +16,8 @@ uses
   ,sqlcmdcli.ResourceStrings
   ,sqlcmdcli.CommandOptions
   ,sqlcmdcli.QueryStore
-  ,sqlcmdcli.StressDB;
+  ,sqlcmdcli.StressDB
+  ,sqlcmdcli.AnonymizeDB;
 
 { TBootCLI }
 
@@ -137,6 +138,28 @@ begin
         TGlobalOptions.Password,
         TGlobalOptions.Verbose,
         TStressDBOptions.MeltCPU);
+    end);
+
+
+  // Operation: Anonymize database
+
+  // Command: anonymizedb
+  LCommand := TOptionsRegistry.RegisterCommand('anonymizedb', 'anondb',
+    RS_CMD_ANONYMIZEDB_DESCRIPTION, RS_CMD_ANONYMIZEDB_INFO,
+    'anonymizedb -servername:<name> -databasename:<dbname> -username:<name> -password:<password>');
+  LCommand.Examples.Add('anonymizedb -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489');
+  LCommand.Examples.Add('anonymizedb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+  LCommand.Examples.Add('anondb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+
+  TCommandHandler.RegisterCommand('anonymizedb',
+    procedure()
+    begin
+      TAnonymizeDB.Run(
+        TGlobalOptions.ServerName,
+        TGlobalOptions.DatabaseName,
+        TGlobalOptions.UserName,
+        TGlobalOptions.Password,
+        TGlobalOptions.Verbose);
     end);
 end;
 

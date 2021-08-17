@@ -24,7 +24,8 @@ uses
   sqlcmdcli.QueryStore in '..\..\Sources\sqlcmdcli.QueryStore.pas',
   sqlcmdcli.StressDB.QueryExecutor in '..\..\Sources\sqlcmdcli.StressDB.QueryExecutor.pas',
   sqlcmdcli.StressDB in '..\..\Sources\sqlcmdcli.StressDB.pas',
-  sqlcmdcli.SchemaExtractor in '..\..\Sources\sqlcmdcli.SchemaExtractor.pas';
+  sqlcmdcli.SchemaExtractor in '..\..\Sources\sqlcmdcli.SchemaExtractor.pas',
+  sqlcmdcli.AnonymizeDB in '..\..\Sources\sqlcmdcli.AnonymizeDB.pas';
 
 var
   LHeader: string;

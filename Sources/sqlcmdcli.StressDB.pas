@@ -27,7 +27,6 @@ class procedure TStressDB.Run(const AServerName, ADatabaseName, AUserName,
 var
   LConnection: TADOConnection;
   LDBSchema: TDBSchema;
-  LDBIndex: TDBSchemaIndex;
   LDBSchemaExtractor: TSQLDBSchemaExtractor;
   LQueryExecutor: TSQLDBQueryExecutor;
 begin
@@ -37,7 +36,7 @@ begin
     // Create
     LConnection := TADOConnection.Create(nil);
     LDBSchema := TDBSchema.Create;
-    LDBIndex := TDBSchemaIndex.Create;
+    //LDBIndex := TDBSchemaIndex.Create;
 
     try
       // ADO connection string
@@ -62,9 +61,9 @@ begin
       // Perform extract schema
       LDBSchemaExtractor.ExtractSchema;
       LDBSchema := LDBSchemaExtractor.DBSchema;
-      LDBIndex := LDBSchemaExtractor.DBSchemaIndex;
+      //LDBIndex := LDBSchemaExtractor.DBSchemaIndex;
 
-      LQueryExecutor := TSQLDBQueryExecutor.Create(LConnection, LDBIndex, LDBSchema);
+      LQueryExecutor := TSQLDBQueryExecutor.Create(LConnection, LDBSchema);
       LQueryExecutor.StressDB(AMeltCPU);  // ToDo: MeltCPU option is not available now!
 
     finally
