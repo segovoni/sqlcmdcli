@@ -102,7 +102,6 @@
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_Keys>CompanyName=;FileDescription=Command Line Interface for SQL Server tests - Debug;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=</VerInfo_Keys>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
-        <Debugger_RunParams>anonymizedb -servername:BEER -databasename:testanonymize -username:sa -password:1Password1</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>

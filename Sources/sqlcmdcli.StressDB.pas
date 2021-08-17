@@ -59,7 +59,7 @@ begin
       LDBSchemaExtractor := TSQLDBSchemaExtractor.Create(LConnection);
 
       // Perform extract schema
-      LDBSchemaExtractor.ExtractSchema;
+      LDBSchemaExtractor.ExtractSchema(stFull);
       LDBSchema := LDBSchemaExtractor.DBSchema;
       //LDBIndex := LDBSchemaExtractor.DBSchemaIndex;
 

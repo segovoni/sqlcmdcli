@@ -4,6 +4,8 @@ interface
 
 type
   TAnonymizeDB = class(TObject)
+  private
+
   public
     class procedure Run(const AServerName, ADatabaseName, AUserName, APassword: string;
       const AVerbose: Boolean);
@@ -31,9 +33,11 @@ var
   LDBSchemaExtractor: TSQLDBSchemaExtractor;
   LQry: TADOQuery;
   LTableName: string;
+  LFKName: string;
   LIndexInfo: Integer;
   LListSQLDBTableInfo: TObjectList<TSQLDBTableInfo>;
   LSQLDBTableInfo: TSQLDBTableInfo;
+  LFK: TDictionary<string, string>;
 
 begin
   CoInitialize(nil);
@@ -64,9 +68,14 @@ begin
       LDBSchemaExtractor := TSQLDBSchemaExtractor.Create(LConnection);
 
       // Perform extract schema
-      LDBSchemaExtractor.ExtractSchema;
+      if (AVerbose) then
+        TConsole.Log(Format('Extract schema for %s ...', [ADatabaseName]), Success, False);
+
+      LDBSchemaExtractor.ExtractSchema(stText);
       LDBSchema := LDBSchemaExtractor.DBSchema;
       //LDBSchemaIndex := LDBSchemaExtractor.DBSchemaIndex;
+      if (AVerbose) then
+        TConsole.Log('Done!', Success, True);
 
       // Anonymization logic
 
@@ -80,6 +89,19 @@ begin
 
       LConnection.BeginTrans;
       LQry.Connection := LConnection;
+
+      LFK := TDBUtils.GetForeignKeyOnTextColumns(LConnection);
+
+      // Disable FK constraint
+      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]), Success, True);
+      for LFKName in LFK.Keys do
+      begin
+        LFK.TryGetValue(LFKName, LTableName);
+        LQry.SQL.Text :=
+          'ALTER TABLE ' + LTableName + ' NOCHECK CONSTRAINT ' + LFKName;
+        LQry.ExecSQL;
+      end;
+      TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_FK_END, Success, True);
 
       for LTableName in LDBSchema.Keys do
       begin
@@ -107,6 +129,18 @@ begin
       end;
 
       LQry.Close;
+
+      // Enable FK constraint
+      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
+      for LFKName in LFK.Keys do
+      begin
+        LFK.TryGetValue(LFKName, LTableName);
+        LQry.SQL.Text :=
+          'ALTER TABLE ' + LTableName + ' CHECK CONSTRAINT ' + LFKName;
+        LQry.ExecSQL;
+      end;
+      TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_FK_END, Success, True);
+
       LConnection.CommitTrans;
       TConsole.Log(Format(RS_CMD_ANONYMIZEDB_END, [ADatabaseName]), Success, False);
 

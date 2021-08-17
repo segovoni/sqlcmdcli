@@ -7,6 +7,8 @@ uses
   ,Data.Win.ADODB;
 
 type
+  TSchemaType = (stFull, stText);
+
   TSQLDBTableInfo = class(TObject)
   protected
     FTableSchema: string;
@@ -36,6 +38,7 @@ type
   private
     function GetDBSchema: TDBSchema;
     //function GetDBSchemaIndex: TDBSchemaIndex;
+    function GetSQLbySchemaType(ASchemaType: TSchemaType): string;
   protected
     FConnection: TADOConnection;
     FDBSchema: TDBSchema;
@@ -43,7 +46,7 @@ type
   public
     constructor Create(AConnection: TADOConnection);
     destructor Destroy; override;
-    procedure ExtractSchema;
+    procedure ExtractSchema(ASchemaType: TSchemaType);
     property DBSchema: TDBSchema read GetDBSchema;
     //property DBSchemaIndex: TDBSchemaIndex read GetDBSchemaIndex;
   end;
@@ -73,7 +76,7 @@ begin
   inherited;
 end;
 
-procedure TSQLDBSchemaExtractor.ExtractSchema;
+procedure TSQLDBSchemaExtractor.ExtractSchema(ASchemaType: TSchemaType);
 var
   LQry: TADOQuery;
   //LColumn: TSQLDBTableInfo;
@@ -81,7 +84,7 @@ var
   LList: TObjectList<TSQLDBTableInfo>;
   //LIndex: Integer;
 begin
-  // Logica di estrazione dello schema DB
+  // Database schema extractor logic
 
   LQry := TADOQuery.Create(nil);
   LList := TObjectList<TSQLDBTableInfo>.Create();
@@ -89,30 +92,7 @@ begin
   //LIndex := 0;
   try
     LQry.Connection := FConnection;
-    LQry.SQL.Text :=
-      'SELECT ' +
-        'TABLE_SCHEMA = SCHEMA_NAME(T.schema_id) ' +
-        ',TABLE_NAME = T.name ' +
-        ',ORDINAL_POSITION = C.column_id ' +
-        ',COLUMN_NAME = C.name ' +
-        ',DATA_TYPE = TYPE_NAME(C.system_type_id) ' +
-        ',COLUMN_IDENTITY = C.is_identity ' +
-        //',ROWS = P.rows ' +
-      'FROM ' +
-        'sys.tables AS T ' +
-      'JOIN ' +
-        'sys.columns AS C ON T.object_id=C.object_id ' +
-      //'JOIN ' +
-      //  'sys.partitions AS P on P.object_id=T.object_id ' +
-      'WHERE ' +
-        '(T.type = ''U'') ' +
-        'AND (T.is_memory_optimized = 0) ' +
-        'AND (T.is_ms_shipped = 0) ' +
-      'ORDER BY ' +
-        'TABLE_SCHEMA ' +
-        ',TABLE_NAME ' +
-        ',COLUMN_NAME ' +
-        ',ORDINAL_POSITION';
+    LQry.SQL.Text := GetSQLbySchemaType(ASchemaType);
     LQry.Open;
 
     //
@@ -143,8 +123,9 @@ begin
                                          LQry.FieldByName('COLUMN_IDENTITY').AsBoolean
                                          ))
       else begin
-        TConsole.Log('Add ' + LCurrentTable, Info, True);
         FDBSchema.Add(LCurrentTable, LList);
+        //TConsole.Log('Schema saved for ' + LCurrentTable, Info, True);
+
         //FDBSchemaIndex.Add(LIndex, LCurrentTable);
         //Inc(LIndex);
 
@@ -182,6 +163,60 @@ end;
 function TSQLDBSchemaExtractor.GetDBSchema: TDictionary<string, TOBjectList<TSQLDBTableInfo>>;
 begin
   Result := FDBSchema;
+end;
+
+function TSQLDBSchemaExtractor.GetSQLbySchemaType(ASchemaType: TSchemaType): string;
+begin
+  if (ASchemaType = stFull) then
+    Result :=
+      'SELECT ' +
+        'TABLE_SCHEMA = SCHEMA_NAME(T.schema_id) ' +
+        ',TABLE_NAME = T.name ' +
+        ',ORDINAL_POSITION = C.column_id ' +
+        ',COLUMN_NAME = C.name ' +
+        ',DATA_TYPE = TYPE_NAME(C.system_type_id) ' +
+        ',COLUMN_IDENTITY = C.is_identity ' +
+        //',ROWS = P.rows ' +
+      'FROM ' +
+        'sys.tables AS T ' +
+      'JOIN ' +
+        'sys.columns AS C ON T.object_id=C.object_id ' +
+      //'JOIN ' +
+      //  'sys.partitions AS P on P.object_id=T.object_id ' +
+      'WHERE ' +
+        '(T.type = ''U'') ' +
+        'AND (T.is_memory_optimized = 0) ' +
+        'AND (T.is_ms_shipped = 0) ' +
+      'ORDER BY ' +
+        'TABLE_SCHEMA ' +
+        ',TABLE_NAME ' +
+        ',COLUMN_NAME ' +
+        ',ORDINAL_POSITION'
+  else if (ASchemaType = stText) then
+    Result :=
+      'SELECT ' +
+        'TABLE_SCHEMA = SCHEMA_NAME(T.schema_id) ' +
+        ',TABLE_NAME = T.name ' +
+        ',ORDINAL_POSITION = C.column_id ' +
+        ',COLUMN_NAME = C.name ' +
+        ',DATA_TYPE = TYPE_NAME(C.system_type_id) ' +
+        ',COLUMN_IDENTITY = C.is_identity ' +
+      'FROM ' +
+        'sys.tables AS T ' +
+      'JOIN ' +
+        'sys.columns AS C ON T.object_id=C.object_id ' +
+      'WHERE ' +
+        '(T.type = ''U'') ' +
+        'AND (T.is_memory_optimized = 0) ' +
+        'AND (T.is_ms_shipped = 0) ' +
+        'AND (C.is_computed = 0) ' +
+        'AND TYPE_NAME(C.system_type_id) IN (''char'', ''nchar'', ''varchar'', ''nvarchar'', ''text'', ''ntext'') ' +
+      'ORDER BY ' +
+        'TABLE_SCHEMA ' +
+        ',TABLE_NAME ' +
+        ',ORDINAL_POSITION'
+  else
+    Result := '';
 end;
 
 //function TSQLDBSchemaExtractor.GetDBSchemaIndex: TDBSchemaIndex;
