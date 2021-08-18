@@ -3,11 +3,10 @@ unit sqlcmdcli.StressDB.QueryExecutor;
 interface
 
 uses
-  ADODB
+  Data.Win.ADODB
   ,sqlcmdcli.SchemaExtractor;
 
 type
-
   TSQLDBQueryExecutor = class(TObject)
   protected
     FConnection: TADOConnection;
@@ -56,7 +55,8 @@ begin
 
     for LTableName in FSchema.Keys do
     begin
-      LQry.SQL.Text := 'SELECT * FROM ' + LTableName;
+      LQry.SQL.Text :=
+        'SELECT * FROM ' + LTableName;
       TConsole.Log(LQry.SQL.Text, Success, False);
       LQry.Open;
       LQry.RecordCount;
