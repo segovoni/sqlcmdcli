@@ -7,3 +7,7 @@
  |___/\__, |_|\___|_| |_| |_|\__,_|\___|_|_|  |_(_)___/ 
          | |                                            
          |_|                                            
+
+sqlcmdcli utility lets you connect to a SQL Server instance and run specific commands!
+
+https://github.com/segovoni/sqlcmdcli
