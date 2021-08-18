@@ -4,8 +4,6 @@ interface
 
 type
   TAnonymizeDB = class(TObject)
-  private
-
   public
     class procedure Run(const AServerName, ADatabaseName, AUserName, APassword: string;
       const AVerbose: Boolean);
@@ -35,6 +33,9 @@ var
   LTableName: string;
   LFKName: string;
   LIndexInfo: Integer;
+  LPct: Integer;
+  Li: Integer;
+  LStopValue: Integer;
   LListSQLDBTableInfo: TObjectList<TSQLDBTableInfo>;
   LSQLDBTableInfo: TSQLDBTableInfo;
   LFK: TDictionary<string, string>;
@@ -93,7 +94,8 @@ begin
       LFK := TDBUtils.GetForeignKeyOnTextColumns(LConnection);
 
       // Disable FK constraint
-      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]), Success, True);
+      if (AVerbose) then
+        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]), Success, True);
       for LFKName in LFK.Keys do
       begin
         LFK.TryGetValue(LFKName, LTableName);
@@ -103,11 +105,11 @@ begin
       end;
       TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_FK_END, Success, True);
 
+      LStopValue := LDBSchema.Keys.Count;
+      Li := 1;
       for LTableName in LDBSchema.Keys do
       begin
-        if LDBSchema.TryGetValue(LTableName, LListSQLDBTableInfo) then
-          //TConsole.Log(LTableName + ': ', Success, False);
-          ;
+        LDBSchema.TryGetValue(LTableName, LListSQLDBTableInfo);
 
         for LIndexInfo := 0 to (LListSQLDBTableInfo.Count - 1) do
         begin
@@ -119,19 +121,32 @@ begin
              (LSQLDBTableInfo.DataType = '[text]') or
              (LSQLDBTableInfo.DataType = '[ntext]') then
           begin
-            LQry.SQL.Text := 'UPDATE ' + LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
-                             'SET '+ LSQLDBTableInfo.ColumnName + ' = REVERSE(' + LSQLDBTableInfo.ColumnName + ')';
-            //TConsole.Log(LQry.SQL.Text, Success, True);
+            LQry.SQL.Text :=
+              'UPDATE ' +
+                LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
+              'SET ' +
+                LSQLDBTableInfo.ColumnName + ' = REVERSE(' + LSQLDBTableInfo.ColumnName + ')';
+
             LQry.ExecSQL;
           end;
-        end
+        end;
+        LPct := Trunc(( Li * 1.0 / (LStopValue)) * 100);
+        if (AVerbose) then
+          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) + LTableName,
+            Info, True)
+        else
+          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]),
+            Info, True);
 
+        Inc(Li);
       end;
 
       LQry.Close;
 
       // Enable FK constraint
-      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
+      if (AVerbose) then
+        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
+
       for LFKName in LFK.Keys do
       begin
         LFK.TryGetValue(LFKName, LTableName);
