@@ -91,9 +91,14 @@ begin
       LConnection.BeginTrans;
       LQry.Connection := LConnection;
 
-      LFK := TDBUtils.GetForeignKeyOnTextColumns(LConnection);
+      // Create anonymization functions
+      TSQLUtils.SQLCharacterMaskFactory(LConnection);
+      TSQLUtils.SQLStringScramblerFactory(LConnection);
 
-      // Disable FK constraint
+      // Retrive foreign key constraints on text columns
+      LFK := TSQLUtils.GetForeignKeyOnTextColumns(LConnection);
+
+      // Disable foreign key constraints
       if (AVerbose) then
         TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]), Success, True);
       for LFKName in LFK.Keys do
@@ -125,7 +130,7 @@ begin
               'UPDATE ' +
                 LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
               'SET ' +
-                LSQLDBTableInfo.ColumnName + ' = REVERSE(' + LSQLDBTableInfo.ColumnName + ')';
+                LSQLDBTableInfo.ColumnName + ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ')';
 
             LQry.ExecSQL;
           end;
@@ -143,7 +148,7 @@ begin
 
       LQry.Close;
 
-      // Enable FK constraint
+      // Enable FK constraints
       if (AVerbose) then
         TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
 

@@ -185,8 +185,11 @@ begin
       //  'sys.partitions AS P on P.object_id=T.object_id ' +
       'WHERE ' +
         '(T.type = ''U'') ' +
-        'AND (T.is_memory_optimized = 0) ' +
+        //'AND (T.is_memory_optimized = 0) ' +
         'AND (T.is_ms_shipped = 0) ' +
+        'AND (T.temporal_type = 0) ' +
+        'AND (T.is_replicated = 0) ' +
+        'AND (C.is_computed = 0) ' +
       'ORDER BY ' +
         'TABLE_SCHEMA ' +
         ',TABLE_NAME ' +
@@ -207,8 +210,10 @@ begin
         'sys.columns AS C ON T.object_id=C.object_id ' +
       'WHERE ' +
         '(T.type = ''U'') ' +
-        'AND (T.is_memory_optimized = 0) ' +
+        //'AND (T.is_memory_optimized = 0) ' +
         'AND (T.is_ms_shipped = 0) ' +
+        'AND (T.temporal_type = 0) ' +
+        'AND (T.is_replicated = 0) ' +
         'AND (C.is_computed = 0) ' +
         'AND TYPE_NAME(C.system_type_id) IN (''char'', ''nchar'', ''varchar'', ''nvarchar'', ''text'', ''ntext'') ' +
       'ORDER BY ' +

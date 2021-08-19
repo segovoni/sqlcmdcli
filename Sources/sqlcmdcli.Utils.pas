@@ -18,9 +18,11 @@ type
     class function StringScrambler(const AValue: string): string;
   end;
 
-  TDBUtils = class(TObject)
+  TSQLUtils = class(TObject)
   public
     class function GetForeignKeyOnTextColumns(AConnection: TADOConnection): TDictionary<string, string>;
+    class procedure SQLCharacterMaskFactory(AConnection: TADOConnection);
+    class procedure SQLStringScramblerFactory(AConnection: TADOConnection);
   end;
 
 implementation
@@ -69,7 +71,95 @@ end;
 
 { TDBUtils }
 
-class function TDBUtils.GetForeignKeyOnTextColumns(
+class procedure TSQLUtils.SQLCharacterMaskFactory(AConnection: TADOConnection);
+var
+  LQry: TADOQuery;
+begin
+  LQry := TADOQuery.Create(nil);
+
+  try
+    LQry.Connection := AConnection;
+    LQry.SQL.Text :=
+      'IF OBJECT_ID(''dbo.sqlcmdcli_fn_character_mask'', ''FN'') IS NOT NULL ' +
+        'DROP FUNCTION dbo.sqlcmdcli_fn_character_mask;';
+    LQry.ExecSQL;
+
+    LQry.SQL.Text :=
+      // Character_mask from:
+      // https://www.red-gate.com/simple-talk/sql/database-administration/obfuscating-your-sql-server-data/
+      'CREATE FUNCTION dbo.sqlcmdcli_fn_character_mask ' +
+      '( ' +
+        '@OrigVal NVARCHAR(MAX), ' +
+        '@InPlain INT, ' +
+        '@MaskChar NCHAR(1) ' +
+      ') ' +
+      'RETURNS NVARCHAR(MAX) ' +
+      'WITH ENCRYPTION ' +
+      'AS ' +
+      'BEGIN ' +
+        //'-- Variables used ' +
+        'DECLARE @PlainVal NVARCHAR(MAX); ' +
+        'DECLARE @MaskVal NVARCHAR(MAX); ' +
+        'DECLARE @MaskLen INT; ' +
+
+        //'-- Captures the portion of @OrigVal that remains in plain text ' +
+        'SET @PlainVal = RIGHT(@OrigVal,@InPlain); ' +
+        //'-- Defines the length of the repeating value for the mask ' +
+        'SET @MaskLen = (LEN(@OrigVal) - @InPlain); ' +
+        //'-- Captures the mask value ' +
+        'SET @MaskVal = REPLICATE(@MaskChar, @MaskLen); ' +
+        //'-- Returns the masked value ' +
+        'Return @MaskVal + @PlainVal ' +
+      'END';
+    LQry.ExecSQL;
+
+  finally
+    FreeAndNil(LQry);
+  end;
+end;
+
+class procedure TSQLUtils.SQLStringScramblerFactory(
+  AConnection: TADOConnection);
+var
+  LQry: TADOQuery;
+begin
+  LQry := TADOQuery.Create(nil);
+
+  try
+    LQry.Connection := AConnection;
+    LQry.SQL.Text :=
+      'IF OBJECT_ID(''dbo.sqlcmdcli_fn_string_scrambler'', ''FN'') IS NOT NULL ' +
+        'DROP FUNCTION dbo.sqlcmdcli_fn_string_scrambler;';
+    LQry.ExecSQL;
+
+    LQry.SQL.Text :=
+      'CREATE FUNCTION dbo.sqlcmdcli_fn_string_scrambler ' +
+      '( ' +
+      '  @AValue VARCHAR(MAX) ' +
+      ') ' +
+      'RETURNS VARCHAR(MAX) ' +
+      'WITH ENCRYPTION ' +
+      'AS ' +
+      'BEGIN ' +
+      '  DECLARE @Res VARCHAR(MAX) = ''''; ' +
+
+      //'  -- "abcd" --> "dbca"
+      '  IF (LEN(@AValue) > 2) ' +
+      '    SET @Res = RIGHT(@AValue, 1) + SUBSTRING(@AValue, 2, LEN(@AValue)-2) + LEFT(@AValue, 1) ' +
+      '  ELSE IF (LEN(@AValue) = 2) ' +
+      '    SET @Res = REVERSE(@AValue) ' +
+      '  ELSE ' +
+      '    SET @Res = @AValue ' +
+      '  RETURN @Res ' +
+      'END';
+    LQry.ExecSQL;
+
+  finally
+    FreeAndNil(LQry);
+  end;
+end;
+
+class function TSQLUtils.GetForeignKeyOnTextColumns(
   AConnection: TADOConnection): TDictionary<string, string>;
 var
   LQry: TADOQuery;
