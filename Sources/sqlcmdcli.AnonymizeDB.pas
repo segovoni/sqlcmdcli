@@ -32,6 +32,7 @@ var
   LQry: TADOQuery;
   LTableName: string;
   LFKName: string;
+  LSql: string;
   LIndexInfo: Integer;
   LPct: Integer;
   Li: Integer;
@@ -39,7 +40,9 @@ var
   LListSQLDBTableInfo: TObjectList<TSQLDBTableInfo>;
   LSQLDBTableInfo: TSQLDBTableInfo;
   LFK: TDictionary<string, string>;
-
+  LTRDisable: TDictionary<string, string>;
+  LTREnable: TDictionary<string, string>;
+  LTableList: TDictionary<string, string>;
 begin
   CoInitialize(nil);
 
@@ -47,6 +50,7 @@ begin
     // Create
     LConnection := TADOConnection.Create(nil);
     LQry := TADOQuery.Create(nil);
+    LTableList := TDictionary<string, string>.Create;
 
     try
       // ADO connection string
@@ -110,6 +114,27 @@ begin
       end;
       TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_FK_END, Success, True);
 
+      for LTableName in LDBSchema.Keys do
+      begin
+        LTableList.Add(LTableName, LTableName);
+      end;
+
+      // Retrive triggers on table with text columns
+      LTRDisable := TSQLUtils.GetStateTriggerStatements(LConnection, LTableList, False);
+      LTREnable := TSQLUtils.GetStateTriggerStatements(LConnection, LTableList, True);
+
+      // Disable triggers
+      if (AVerbose) then
+        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_TR_START, [ADatabaseName]), Success, True);
+      LQry.Close;
+      for LTableName in LTRDisable.Keys do
+      begin
+        LTRDisable.TryGetValue(LTableName, LSql);
+        LQry.SQL.Text := LSql;
+        LQry.ExecSQL;
+      end;
+      TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_TR_END, Success, True);
+
       LStopValue := LDBSchema.Keys.Count;
       Li := 1;
       for LTableName in LDBSchema.Keys do
@@ -151,7 +176,6 @@ begin
       // Enable FK constraints
       if (AVerbose) then
         TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
-
       for LFKName in LFK.Keys do
       begin
         LFK.TryGetValue(LFKName, LTableName);
@@ -161,15 +185,27 @@ begin
       end;
       TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_FK_END, Success, True);
 
+      // Enable triggers
+      if (AVerbose) then
+        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_TR_START, [ADatabaseName]), Success, True);
+      LQry.Close;
+      for LTableName in LTREnable.Keys do
+      begin
+        LTREnable.TryGetValue(LTableName, LSql);
+        LQry.SQL.Text := LSql;
+        LQry.ExecSQL;
+      end;
+      TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_TR_END, Success, True);
+
       LConnection.CommitTrans;
       TConsole.Log(Format(RS_CMD_ANONYMIZEDB_END, [ADatabaseName]), Success, False);
-
     finally
       FreeAndNil(LDBSchema); // ToDo: To Fix
       LQry.Close;
       LConnection.Close;
       FreeAndNil(LQry);
       FreeAndNil(LConnection);
+      FreeAndNil(LTableList);
     end;
 
   except

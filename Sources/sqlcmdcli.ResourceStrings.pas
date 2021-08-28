@@ -37,10 +37,16 @@ resourcestring
     'removing personally identifiable information from data sets, so that the ' +
     'people whom the data describe remain anonymous (source ' +
     'https://en.wikipedia.org/wiki/Data_anonymization)';
+
   RS_CMD_ANONYMIZEDB_DISABLE_FK_START = 'Disable foreign key constraints on %s';
   RS_CMD_ANONYMIZEDB_DISABLE_FK_END = 'Foreign key constraints disabled successfully!';
   RS_CMD_ANONYMIZEDB_ENABLE_FK_START = 'Enable foreign key constraint on %s';
   RS_CMD_ANONYMIZEDB_ENABLE_FK_END = 'Foreign key constraints enabled successfully!';
+
+  RS_CMD_ANONYMIZEDB_DISABLE_TR_START = 'Disable triggers on %s';
+  RS_CMD_ANONYMIZEDB_DISABLE_TR_END = 'Triggers disabled successfully!';
+  RS_CMD_ANONYMIZEDB_ENABLE_TR_START = 'Enable triggers on %s';
+  RS_CMD_ANONYMIZEDB_ENABLE_TR_END = 'Enable disabled successfully!';
 
   RS_ERROR_COMMAND_UNKNOWN = 'The specified command does not exist: %s';
 

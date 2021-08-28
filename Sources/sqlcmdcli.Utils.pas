@@ -20,7 +20,11 @@ type
 
   TSQLUtils = class(TObject)
   public
-    class function GetForeignKeyOnTextColumns(AConnection: TADOConnection): TDictionary<string, string>;
+    class function GetForeignKeyOnTextColumns(AConnection: TADOConnection)
+      : TDictionary<string, string>;
+    class function GetStateTriggerStatements(AConnection: TADOConnection;
+      const ATableList: TDictionary<string, string>; const AState: Boolean)
+      : TDictionary<string, string>;
     class procedure SQLCharacterMaskFactory(AConnection: TADOConnection);
     class procedure SQLStringScramblerFactory(AConnection: TADOConnection);
   end;
@@ -135,24 +139,118 @@ begin
     LQry.SQL.Text :=
       'CREATE FUNCTION dbo.sqlcmdcli_fn_string_scrambler ' +
       '( ' +
-      '  @AValue VARCHAR(MAX) ' +
+      '  @AValue NVARCHAR(MAX) ' +
       ') ' +
-      'RETURNS VARCHAR(MAX) ' +
+      'RETURNS NVARCHAR(MAX) ' +
       'WITH ENCRYPTION ' +
       'AS ' +
       'BEGIN ' +
-      '  DECLARE @Res VARCHAR(MAX) = ''''; ' +
+      '  DECLARE @Res NVARCHAR(MAX) = ''''; ' +
 
       //'  -- "abcd" --> "dbca"
       '  IF (LEN(@AValue) > 2) ' +
-      '    SET @Res = RIGHT(@AValue, 1) + SUBSTRING(@AValue, 2, LEN(@AValue)-2) + LEFT(@AValue, 1) ' +
-      '  ELSE IF (LEN(@AValue) = 2) ' +
+      //'    SET @Res = RIGHT(@AValue, 1) + SUBSTRING(@AValue, 2, LEN(@AValue)-2) + LEFT(@AValue, 1) ' +
+      //'    SET @Res = RIGHT(@AValue, 1) + REVERSE(SUBSTRING(@AValue, 2, LEN(@AValue)-2)) + LEFT(@AValue, 1) ' +
       '    SET @Res = REVERSE(@AValue) ' +
+      '  ELSE IF (LEN(@AValue) = 2) ' +
+      '    SET @Res = LTRIM(RTRIM(REVERSE(@AValue))) ' +
       '  ELSE ' +
       '    SET @Res = @AValue ' +
       '  RETURN @Res ' +
       'END';
     LQry.ExecSQL;
+
+  finally
+    FreeAndNil(LQry);
+  end;
+end;
+
+class function TSQLUtils.GetStateTriggerStatements(AConnection: TADOConnection;
+  const ATableList: TDictionary<string, string>; const AState: Boolean)
+  : TDictionary<string, string>;
+var
+  LQry: TADOQuery;
+  LSql: string;
+  LTableName: string;
+  LTableList: string;
+begin
+  Result := TDictionary<string, string>.Create;
+  LQry := TADOQuery.Create(nil);
+  try
+    LQry.Connection := AConnection;
+
+    for LTableName in ATableList.Keys do
+    begin
+      LTableList := LTableList + LTableName + ', ';
+    end;
+
+    LSql :=
+      'SELECT ' +
+        'TRIGGER_NAME = tr.name ' +
+        ',T.TABLE_SCHEMA ' +
+        ',T.TABLE_NAME ' +
+        ',FullTableName = ''['' + RTRIM(T.TABLE_SCHEMA) + ''].['' + RTRIM(T.TABLE_NAME) + '']''';
+
+    if (AState) then
+      LSql :=
+        LSql +
+        ',''E'' AS OperationType ' +  // E = Enable
+        ',(' +
+        '''ALTER TABLE ['' + RTRIM(T.TABLE_SCHEMA) + ''].['' + RTRIM(T.TABLE_NAME) + ''] '' + ' +
+        '''ENABLE TRIGGER ['' + RTRIM(tr.name) + ''];''' +
+        ' ) AS SQLStr '
+    else
+      LSql :=
+        LSql +
+        ',''I'' AS OperationType ' + // I = Disable
+        ',(' +
+        '''ALTER TABLE ['' + RTRIM(T.TABLE_SCHEMA) + ''].['' + RTRIM(T.TABLE_NAME) + ''] '' + ' +
+        '''DISABLE TRIGGER ['' + RTRIM(tr.name) + ''];''' +
+        ' ) AS SQLStr ';
+
+    LSql :=
+      LSql +
+      'FROM ' +
+        'sys.triggers AS tr ' +
+      'JOIN ' +
+        'sys.objects AS o ON o.[object_id]=tr.[parent_id] ' +
+      'JOIN ' +
+        'sys.schemas AS s ON o.[schema_id]=s.[schema_id] ' +
+      'JOIN ' +
+        'INFORMATION_SCHEMA.TABLES AS T ' +
+        'ON (T.TABLE_SCHEMA=s.name) ' +
+           'AND (T.TABLE_NAME=o.name) ' +
+      'WHERE ' +
+        'EXISTS (SELECT ' +
+                  'C.COLUMN_NAME ' +
+                'FROM ' +
+                  'INFORMATION_SCHEMA.COLUMNS AS C ' +
+                'WHERE ' +
+                  '(T.TABLE_CATALOG=C.TABLE_CATALOG) ' +
+                  'AND (T.TABLE_SCHEMA=C.TABLE_SCHEMA) ' +
+                  'AND (T.TABLE_NAME=C.TABLE_NAME) ' +
+                  'AND (C.DATA_TYPE IN (''char'', ''varchar'', ''text'')) ' +
+               ') ' +
+        // Only enabled triggers
+        'AND (tr.is_disabled = 0) ' +
+        // Current database
+        'AND (T.TABLE_CATALOG=DB_NAME()) ' +
+        // Table list
+        'AND (CHARINDEX(('',['' + LTRIM(RTRIM(T.TABLE_SCHEMA + ''].['' + T.TABLE_NAME)) + ''],''), ' +
+                       '('','' + REPLACE(''' + LTableList + ''', '' '', '''') + '','')) > 0) ' +
+        // ToDo: Trigger on indexed views
+        'AND (T.TABLE_TYPE=''BASE TABLE'')';
+
+    LQry.SQL.Text := LSql;
+    LQry.Open;
+
+    while (not LQry.Eof) do
+    begin
+      Result.Add(LQry.FieldByName('TRIGGER_NAME').AsString,
+                 LQry.FieldByName('SQLStr').AsString);
+      LQry.Next;
+    end;
+    LQry.Close;
 
   finally
     FreeAndNil(LQry);
