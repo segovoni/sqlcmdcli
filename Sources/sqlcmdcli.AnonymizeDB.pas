@@ -31,7 +31,7 @@ var
   LDBSchemaExtractor: TSQLDBSchemaExtractor;
   LQry: TADOQuery;
   LTableName: string;
-  LFKName: string;
+  LConstraintName: string;
   LSql: string;
   LIndexInfo: Integer;
   LPct: Integer;
@@ -40,6 +40,7 @@ var
   LListSQLDBTableInfo: TObjectList<TSQLDBTableInfo>;
   LSQLDBTableInfo: TSQLDBTableInfo;
   LFK: TDictionary<string, string>;
+  LCHK: TDictionary<string, string>;
   LTRDisable: TDictionary<string, string>;
   LTREnable: TDictionary<string, string>;
   LTableList: TDictionary<string, string>;
@@ -105,14 +106,29 @@ begin
       // Disable foreign key constraints
       if (AVerbose) then
         TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]), Success, True);
-      for LFKName in LFK.Keys do
+      for LConstraintName in LFK.Keys do
       begin
-        LFK.TryGetValue(LFKName, LTableName);
+        LFK.TryGetValue(LConstraintName, LTableName);
         LQry.SQL.Text :=
-          'ALTER TABLE ' + LTableName + ' NOCHECK CONSTRAINT ' + LFKName;
+          'ALTER TABLE ' + LTableName + ' NOCHECK CONSTRAINT ' + LConstraintName;
         LQry.ExecSQL;
       end;
       TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_FK_END, Success, True);
+
+      // Retrive foreign key constraints on text columns
+      LCHK := TSQLUtils.GetCheckConstraintOnTextColumns(LConnection);
+
+      // Disable check constraints
+      if (AVerbose) then
+        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_CHK_START, [ADatabaseName]), Success, True);
+      for LConstraintName in LCHK.Keys do
+      begin
+        LCHK.TryGetValue(LConstraintName, LTableName);
+        LQry.SQL.Text :=
+          'ALTER TABLE ' + LTableName + ' NOCHECK CONSTRAINT ' + LConstraintName;
+        LQry.ExecSQL;
+      end;
+      TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_CHK_END, Success, True);
 
       for LTableName in LDBSchema.Keys do
       begin
@@ -176,14 +192,26 @@ begin
       // Enable FK constraints
       if (AVerbose) then
         TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
-      for LFKName in LFK.Keys do
+      for LConstraintName in LFK.Keys do
       begin
-        LFK.TryGetValue(LFKName, LTableName);
+        LFK.TryGetValue(LConstraintName, LTableName);
         LQry.SQL.Text :=
-          'ALTER TABLE ' + LTableName + ' CHECK CONSTRAINT ' + LFKName;
+          'ALTER TABLE ' + LTableName + ' CHECK CONSTRAINT ' + LConstraintName;
         LQry.ExecSQL;
       end;
       TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_FK_END, Success, True);
+
+      // Enable check constraints
+      if (AVerbose) then
+        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_CHK_START, [ADatabaseName]), Success, True);
+      for LConstraintName in LCHK.Keys do
+      begin
+        LCHK.TryGetValue(LConstraintName, LTableName);
+        LQry.SQL.Text :=
+          'ALTER TABLE ' + LTableName + ' CHECK CONSTRAINT ' + LConstraintName;
+        LQry.ExecSQL;
+      end;
+      TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_CHK_END, Success, True);
 
       // Enable triggers
       if (AVerbose) then

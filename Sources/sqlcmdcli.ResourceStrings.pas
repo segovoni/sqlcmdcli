@@ -48,6 +48,11 @@ resourcestring
   RS_CMD_ANONYMIZEDB_ENABLE_TR_START = 'Enable triggers on %s';
   RS_CMD_ANONYMIZEDB_ENABLE_TR_END = 'Enable disabled successfully!';
 
+  RS_CMD_ANONYMIZEDB_DISABLE_CHK_START = 'Disable check constraints on %s';
+  RS_CMD_ANONYMIZEDB_DISABLE_CHK_END = 'Check constraints disabled successfully!';
+  RS_CMD_ANONYMIZEDB_ENABLE_CHK_START = 'Enable check constraint on %s';
+  RS_CMD_ANONYMIZEDB_ENABLE_CHK_END = 'Check constraints enabled successfully!';
+
   RS_ERROR_COMMAND_UNKNOWN = 'The specified command does not exist: %s';
 
   RS_STATUS_MSG = #13'Processing %d of %d (%d%%)... ';

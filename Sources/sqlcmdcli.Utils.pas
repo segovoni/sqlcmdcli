@@ -22,6 +22,8 @@ type
   public
     class function GetForeignKeyOnTextColumns(AConnection: TADOConnection)
       : TDictionary<string, string>;
+    class function GetCheckConstraintOnTextColumns(AConnection: TADOConnection)
+      : TDictionary<string, string>;
     class function GetStateTriggerStatements(AConnection: TADOConnection;
       const ATableList: TDictionary<string, string>; const AState: Boolean)
       : TDictionary<string, string>;
@@ -257,6 +259,49 @@ begin
   end;
 end;
 
+class function TSQLUtils.GetCheckConstraintOnTextColumns(
+  AConnection: TADOConnection): TDictionary<string, string>;
+var
+  LQry: TADOQuery;
+begin
+  LQry := TADOQuery.Create(nil);
+  Result := TDictionary<string, string>.Create;
+
+  try
+    LQry.Connection := AConnection;
+    LQry.SQL.Text :=
+      'SELECT ' +
+        'check_constraint_name = con.[name] ' +
+        ',table_name = ''['' + SCHEMA_NAME(t.schema_id) + ''].['' + t.[name] + '']''' +
+        ',column_name = ''['' + col.[name] + '']''' +
+        ',con.[definition] ' +
+      'FROM ' +
+        'sys.check_constraints AS con ' +
+      'LEFT OUTER JOIN ' +
+        'sys.objects AS t ON con.parent_object_id = t.object_id ' +
+      'LEFT OUTER JOIN ' +
+        'sys.columns AS col ON con.parent_column_id = col.column_id ' +
+          'AND con.parent_object_id = col.object_id ' +
+      'WHERE ' +
+        '(TYPE_NAME(col.system_type_id) IN (''char'', ''nchar'', ''varchar'', ''nvarchar'', ''text'', ''ntext'')) ' +
+        'AND (con.is_disabled = 0) ' +
+      'ORDER BY ' +
+        'con.name';
+    LQry.Open;
+
+    while not(LQry.Eof) do
+    begin
+      Result.Add(LQry.FieldByName('check_constraint_name').AsString,
+        LQry.FieldByName('table_name').AsString);
+      LQry.Next;
+    end;
+    LQry.Close;
+
+  finally
+    FreeAndNil(LQry);
+  end;
+end;
+
 class function TSQLUtils.GetForeignKeyOnTextColumns(
   AConnection: TADOConnection): TDictionary<string, string>;
 var
@@ -297,14 +342,13 @@ begin
     while not (LQry.Eof) do
     begin
       Result.Add(LQry.FieldByName('fk_constraint_name').AsString, LQry.FieldByName('foreign_table').AsString);
-      LQry.Next
+      LQry.Next;
     end;
     LQry.Close;
 
   finally
     FreeAndNil(LQry);
   end;
-
 end;
 
 end.
