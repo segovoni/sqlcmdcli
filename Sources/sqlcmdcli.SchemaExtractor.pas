@@ -15,14 +15,16 @@ type
     FTableName: string;
     FColumnName: string;
     FDataType: string;
+    FMaxLength: Integer;
     FColumnIdentity: Boolean;
   public
     constructor Create(const ATableSchema, ATableName, AColumnName, ADataType: string;
-      const AColumnIdentity: Boolean);
+      const AMaxLength: Integer; const AColumnIdentity: Boolean);
     property TableSchema: string read FTableSchema;
     property TableName: string read FTableName;
     property ColumnName: string read FColumnName;
     property DataType: string read FDataType;
+    property MaxLength: Integer read FMaxLength;
     property ColumnIdentity: Boolean read FColumnIdentity;
   end;
 
@@ -120,6 +122,7 @@ begin
                                          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString),
                                          TSQLObjectNameFormatter.Format(LQry.FieldByName('COLUMN_NAME').AsString),
                                          TSQLObjectNameFormatter.Format(LQry.FieldByName('DATA_TYPE').AsString),
+                                         LQry.FieldByName('MAX_LENGHT').AsInteger,
                                          LQry.FieldByName('COLUMN_IDENTITY').AsBoolean
                                          ))
       else begin
@@ -140,6 +143,7 @@ begin
                                          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString),
                                          TSQLObjectNameFormatter.Format(LQry.FieldByName('COLUMN_NAME').AsString),
                                          TSQLObjectNameFormatter.Format(LQry.FieldByName('DATA_TYPE').AsString),
+                                         LQry.FieldByName('MAX_LENGHT').AsInteger,
                                          LQry.FieldByName('COLUMN_IDENTITY').AsBoolean
                                          ));
         LCurrentTable :=
@@ -174,6 +178,7 @@ begin
         ',TABLE_NAME = T.name ' +
         ',ORDINAL_POSITION = C.column_id ' +
         ',COLUMN_NAME = C.name ' +
+        ',MAX_LENGHT = C.max_length ' +
         ',DATA_TYPE = TYPE_NAME(C.system_type_id) ' +
         ',COLUMN_IDENTITY = C.is_identity ' +
         //',ROWS = P.rows ' +
@@ -202,6 +207,7 @@ begin
         ',TABLE_NAME = T.name ' +
         ',ORDINAL_POSITION = C.column_id ' +
         ',COLUMN_NAME = C.name ' +
+        ',MAX_LENGHT = C.max_length ' +
         ',DATA_TYPE = TYPE_NAME(C.system_type_id) ' +
         ',COLUMN_IDENTITY = C.is_identity ' +
       'FROM ' +
@@ -240,11 +246,12 @@ end;
 { TSQLDBTableInfo }
 
 constructor TSQLDBTableInfo.Create(const ATableSchema, ATableName, AColumnName,
-  ADataType: string; const AColumnIdentity: Boolean);
+  ADataType: string; const AMaxLength: Integer; const AColumnIdentity: Boolean);
 begin
   FTableSchema := ATableSchema;
   FTableName := ATableName;
   FColumnName := AColumnName;
+  FMaxLength := AMaxLength;
   FDataType := ADataType;
   FColumnIdentity := AColumnIdentity;
 end;

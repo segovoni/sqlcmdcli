@@ -28,7 +28,8 @@ type
       const ATableList: TDictionary<string, string>; const AState: Boolean)
       : TDictionary<string, string>;
     class procedure SQLCharacterMaskFactory(AConnection: TADOConnection);
-    class procedure SQLStringScramblerFactory(AConnection: TADOConnection);
+    class procedure SQLStringReverseFnFactory(AConnection: TADOConnection);
+    class procedure SQLStringScramblerFnFactory(AConnection: TADOConnection);
   end;
 
 implementation
@@ -124,7 +125,7 @@ begin
   end;
 end;
 
-class procedure TSQLUtils.SQLStringScramblerFactory(
+class procedure TSQLUtils.SQLStringScramblerFnFactory(
   AConnection: TADOConnection);
 var
   LQry: TADOQuery;
@@ -140,6 +141,49 @@ begin
 
     LQry.SQL.Text :=
       'CREATE FUNCTION dbo.sqlcmdcli_fn_string_scrambler ' +
+      '(' +
+      '  @AValue AS NVARCHAR(MAX) ' +
+      ') ' +
+      'RETURNS NVARCHAR(MAX) ' +
+      'AS BEGIN ' +
+      '  DECLARE @LEN AS INTEGER; ' +
+      '  DECLARE @I AS INTEGER; ' +
+      '  DECLARE @RES AS NVARCHAR(MAX) ' +
+      ' ' +
+      '  SET @RES = ''''; ' +
+      '  SET @LEN = LEN(@AValue); ' +
+      '  SET @I = 1; ' +
+      ' ' +
+      '  WHILE @I <= @LEN ' +
+      '  BEGIN ' +
+      '    SET @RES = @RES + NCHAR(UNICODE(SUBSTRING(@AValue, @I, 1))+1); ' +
+      '  SET @I = @I + 1; ' +
+      '  END; ' +
+      '  RETURN @RES; ' +
+      'END;';
+    LQry.ExecSQL;
+
+  finally
+    FreeAndNil(LQry);
+  end;
+end;
+
+class procedure TSQLUtils.SQLStringReverseFnFactory(
+  AConnection: TADOConnection);
+var
+  LQry: TADOQuery;
+begin
+  LQry := TADOQuery.Create(nil);
+
+  try
+    LQry.Connection := AConnection;
+    LQry.SQL.Text :=
+      'IF OBJECT_ID(''dbo.sqlcmdcli_fn_string_reverse'', ''FN'') IS NOT NULL ' +
+        'DROP FUNCTION dbo.sqlcmdcli_fn_string_reverse;';
+    LQry.ExecSQL;
+
+    LQry.SQL.Text :=
+      'CREATE FUNCTION dbo.sqlcmdcli_fn_string_reverse ' +
       '( ' +
       '  @AValue NVARCHAR(MAX) ' +
       ') ' +

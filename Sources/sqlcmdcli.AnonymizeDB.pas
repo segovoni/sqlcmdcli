@@ -83,8 +83,6 @@ begin
       if (AVerbose) then
         TConsole.Log('Done!', Success, True);
 
-      // Anonymization logic
-
       //LQueryExecutor := TSQLDBQueryExecutor.Create(LConnection, LDBIndex, LDBSchema);
       //LQueryExecutor.Anonymize;
 
@@ -98,7 +96,8 @@ begin
 
       // Create anonymization functions
       TSQLUtils.SQLCharacterMaskFactory(LConnection);
-      TSQLUtils.SQLStringScramblerFactory(LConnection);
+      TSQLUtils.SQLStringReverseFnFactory(LConnection);
+      TSQLUtils.SQLStringScramblerFnFactory(LConnection);
 
       // Retrive foreign key constraints on text columns
       LFK := TSQLUtils.GetForeignKeyOnTextColumns(LConnection);
@@ -151,10 +150,19 @@ begin
       end;
       TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_TR_END, Success, True);
 
+      // Anonymization logic
       LStopValue := LDBSchema.Keys.Count;
       Li := 1;
       for LTableName in LDBSchema.Keys do
       begin
+        LPct := Trunc(( Li * 1.0 / (LStopValue)) * 100);
+        if (AVerbose) then
+          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) + LTableName,
+            Info, True)
+        else
+          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]),
+            Info, True);
+
         LDBSchema.TryGetValue(LTableName, LListSQLDBTableInfo);
 
         for LIndexInfo := 0 to (LListSQLDBTableInfo.Count - 1) do
@@ -167,22 +175,33 @@ begin
              (LSQLDBTableInfo.DataType = '[text]') or
              (LSQLDBTableInfo.DataType = '[ntext]') then
           begin
-            LQry.SQL.Text :=
-              'UPDATE ' +
-                LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
-              'SET ' +
-                LSQLDBTableInfo.ColumnName + ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ')';
+            if ((LSQLDBTableInfo.MaxLength = 1) or
+                (LSQLDBTableInfo.MaxLength = 2)) then
+              Continue
+
+            else if ((LSQLDBTableInfo.MaxLength = -1) or
+                     (LSQLDBTableInfo.MaxLength > 2000)) then
+              LQry.SQL.Text :=
+                'UPDATE ' +
+                  LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
+                'SET ' +
+                  LSQLDBTableInfo.ColumnName +
+                    ' = dbo.sqlcmdcli_fn_string_reverse(' + LSQLDBTableInfo.ColumnName + ')'
+
+            else
+              LQry.SQL.Text :=
+                'UPDATE ' +
+                  LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
+                'SET ' +
+                  LSQLDBTableInfo.ColumnName +
+                    ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ')';
+
+            if (AVerbose) then
+              TConsole.Log(LQry.SQL.Text, Success, True);
 
             LQry.ExecSQL;
           end;
         end;
-        LPct := Trunc(( Li * 1.0 / (LStopValue)) * 100);
-        if (AVerbose) then
-          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) + LTableName,
-            Info, True)
-        else
-          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]),
-            Info, True);
 
         Inc(Li);
       end;
