@@ -186,7 +186,9 @@ begin
                   LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
                 'SET ' +
                   LSQLDBTableInfo.ColumnName +
-                    ' = dbo.sqlcmdcli_fn_string_reverse(' + LSQLDBTableInfo.ColumnName + ')'
+                    ' = dbo.sqlcmdcli_fn_string_reverse(' + LSQLDBTableInfo.ColumnName + ') ' +
+                'WHERE (' + LSQLDBTableInfo.ColumnName + ' IS NOT NULL) ' +
+                  'AND (' + LSQLDBTableInfo.ColumnName + '<>'''')'
 
             else
               LQry.SQL.Text :=
@@ -194,7 +196,9 @@ begin
                   LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
                 'SET ' +
                   LSQLDBTableInfo.ColumnName +
-                    ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ')';
+                    ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ') ' +
+                'WHERE (' + LSQLDBTableInfo.ColumnName + ' IS NOT NULL) ' +
+                  'AND (' + LSQLDBTableInfo.ColumnName + '<>'''')';
 
             if (AVerbose) then
               TConsole.Log(LQry.SQL.Text, Success, True);
