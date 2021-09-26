@@ -143,6 +143,7 @@ begin
       'CREATE FUNCTION dbo.sqlcmdcli_fn_string_scrambler ' +
       '(' +
       '  @AValue AS NVARCHAR(MAX) ' +
+      '  ,@AShift AS INTEGER ' +
       ') ' +
       'RETURNS NVARCHAR(MAX) ' +
       'AS BEGIN ' +
@@ -156,7 +157,7 @@ begin
       ' ' +
       '  WHILE @I <= @LEN ' +
       '  BEGIN ' +
-      '    SET @RES = @RES + NCHAR(UNICODE(SUBSTRING(@AValue, @I, 1))+1); ' +
+      '    SET @RES = @RES + NCHAR(UNICODE(SUBSTRING(@AValue, @I, 1)) + @AShift); ' +
       '  SET @I = @I + 1; ' +
       '  END; ' +
       '  RETURN @RES; ' +
