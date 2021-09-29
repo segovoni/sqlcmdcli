@@ -31,6 +31,7 @@ implementation
 uses
   Winapi.ActiveX
   ,System.SysUtils
+  ,System.Math
   ,sqlcmdcli.SchemaExtractor
   ,sqlcmdcli.Console
   ,sqlcmdcli.ResourceStrings
@@ -321,13 +322,11 @@ begin
 
               else
                 LQry.SQL.Text :=
-                  'DECLARE @Shift INTEGER; ' +
-                  'SELECT @Shift = ABS(CHECKSUM(NEWID()) % 10)+1; ' +
                   'UPDATE ' +
                     LSQLDBTableInfo.TableSchema + '.' + LSQLDBTableInfo.TableName + ' ' +
                   'SET ' +
                     LSQLDBTableInfo.ColumnName +
-                      ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ', @Shift) ' +
+                      ' = dbo.sqlcmdcli_fn_string_scrambler(' + LSQLDBTableInfo.ColumnName + ', ' + IntToStr(RandomRange(1, 9)) + ') ' +
                   'WHERE (' + LSQLDBTableInfo.ColumnName + ' IS NOT NULL) ' +
                     'AND (' + LSQLDBTableInfo.ColumnName + '<>'''')';
 

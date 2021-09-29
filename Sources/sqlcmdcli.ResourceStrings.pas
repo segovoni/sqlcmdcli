@@ -46,7 +46,7 @@ resourcestring
   RS_CMD_ANONYMIZEDB_DISABLE_TR_START = 'Disable triggers on %s';
   RS_CMD_ANONYMIZEDB_DISABLE_TR_END = 'Triggers disabled successfully!';
   RS_CMD_ANONYMIZEDB_ENABLE_TR_START = 'Enable triggers on %s';
-  RS_CMD_ANONYMIZEDB_ENABLE_TR_END = 'Enable disabled successfully!';
+  RS_CMD_ANONYMIZEDB_ENABLE_TR_END = 'Triggers enabled successfully!';
 
   RS_CMD_ANONYMIZEDB_DISABLE_CHK_START = 'Disable check constraints on %s';
   RS_CMD_ANONYMIZEDB_DISABLE_CHK_END = 'Check constraints disabled successfully!';
