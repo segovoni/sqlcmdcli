@@ -1,0 +1,16 @@
+# File: build.yml
+
+trigger:
+- master
+
+pool:
+  name: Decision Making
+  demands: Delphi-10.2.3
+
+steps:
+- powershell: |
+    C:\Delphi\dcc\1023\bin\dcc32.exe sqlcmdcli/Packages/d103/sqlcmdcli.dpr -Usqlcmdcli\Libraries\VSoftTechnologies\Src -Usqlcmdcli\Resources -Usqlcmdcli\Sources -UC:\Delphi\dcc\1023\lib -CC
+    if (Test-Path -path sqlcmdcli.exe) {
+        .\sqlcmdcli.exe
+    }
+  displayName: Build and run tests (Delphi 10.2.3)
