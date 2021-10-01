@@ -9,7 +9,7 @@ pool:
 
 steps:
 - powershell: |
-    C:\Delphi\dcc\1023\bin\dcc32.exe sqlcmdcli/Packages/d103/sqlcmdcli.dpr -Usqlcmdcli\Libraries\VSoftTechnologies\Src -Usqlcmdcli\Resources -Usqlcmdcli\Sources -UC:\Delphi\dcc\1023\lib -CC
+    C:\Delphi\dcc\1023\bin\dcc32.exe $(Build.SourcesDirectory)/Packages/d103/sqlcmdcli.dpr -U$(Build.SourcesDirectory)/Libraries/VSoftTechnologies/Src -U$(Build.SourcesDirectory)/Resources -U$(Build.SourcesDirectory)/Sources -UC:\Delphi\dcc\1023\lib -CC
     if (Test-Path -path sqlcmdcli.exe) {
         .\sqlcmdcli.exe
     }
