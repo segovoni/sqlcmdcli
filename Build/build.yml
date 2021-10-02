@@ -9,8 +9,8 @@ pool:
 
 steps:
 - powershell: |
-    C:\Delphi\dcc\1023\bin\dcc32.exe -NSSystem;System.Win;WinAPI $(Build.SourcesDirectory)/Packages/d103/sqlcmdcli.dpr -U$(Build.SourcesDirectory)/Libraries/VSoftTechnologies/Src -U$(Build.SourcesDirectory)/Resources -U$(Build.SourcesDirectory)/Sources -UC:\Delphi\dcc\1023\lib -UC:\Delphi\dcc\1023\lib\win32\release -UC:\Delphi\dcc\1023\lib\win32\debug -CC
+    C:\Delphi\dcc\1033\bin\dcc32.exe -NSSystem -NSWinapi -NS"Data.Win" -NSsqlcmdcli $(Build.SourcesDirectory)/Packages/d103/sqlcmdcli.dpr -U$(Build.SourcesDirectory)/Libraries/VSoftTechnologies/Src -U$(Build.SourcesDirectory)/Resources -U$(Build.SourcesDirectory)/Sources -UC:\Delphi\dcc\1033\lib -UC:\Delphi\dcc\1033\lib\win32\release -CC
     if (Test-Path -path sqlcmdcli.exe) {
         .\sqlcmdcli.exe
     }
-  displayName: Build and run tests (Delphi 10.2.3)
+  displayName: Build and run tests (Delphi 10.3.3)
