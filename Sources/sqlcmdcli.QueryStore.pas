@@ -14,13 +14,14 @@ implementation
 uses
   System.SysUtils
   ,System.Classes
-  ,ADODB
+  ,Data.Win.ADODB
   ,FireDAC.Comp.Client
   ,FireDAC.Stan.Def
   ,FireDAC.Stan.Param
   ,FireDAC.DApt
-  ,ActiveX
-  ,sqlcmdcli.ResourceStrings, sqlcmdcli.console;
+  ,WinApi.ActiveX
+  ,sqlcmdcli.ResourceStrings
+  ,sqlcmdcli.console;
 
 { TWorkload }
 

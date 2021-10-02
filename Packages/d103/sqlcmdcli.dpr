@@ -1,13 +1,12 @@
 program sqlcmdcli;
 
 {$APPTYPE CONSOLE}
-{$R *.res}
 
 {$IFDEF MSWINDOWS}
-
 {$ENDIF}
 
-{$R *.dres}
+//{$R *.res}
+//{$R *.dres}
 
 uses
   System.SysUtils,
