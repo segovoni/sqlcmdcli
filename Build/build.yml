@@ -28,6 +28,6 @@ steps:
     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/sqlcmdcli.exe'
     includeRootFolder: true
     archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/sqlcmdcli.zip'
     replaceExistingArchive: true
     verbose: true
