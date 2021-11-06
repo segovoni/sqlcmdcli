@@ -17,7 +17,8 @@ uses
   ,sqlcmdcli.CommandOptions
   ,sqlcmdcli.QueryStore
   ,sqlcmdcli.StressDB
-  ,sqlcmdcli.AnonymizeDB;
+  ,sqlcmdcli.AnonymizeDB
+  ,sqlcmdcli.AlterColumn;
 
 { TBootCLI }
 
@@ -33,7 +34,7 @@ begin
 
   // Global options
 
-  // Option verbose
+  // Global option verbose
   LOption := TOptionsRegistry.RegisterOption<Boolean>('verbose', 'v',
     RS_CMD_VERBOSE_INFO,
     procedure(const AValue: Boolean)
@@ -42,7 +43,7 @@ begin
     end);
   LOption.HasValue := False;
 
-  // Option: servername
+  // Global option: servername
   LOption := TOptionsRegistry.RegisterOption<string>('servername', 's',
     RS_CMD_SERVERNAME_INFO,
     procedure(const AValue: string)
@@ -51,7 +52,7 @@ begin
     end);
   LOption.Required := True;
 
-  // Option: databasename
+  // Global option: databasename
   LOption := TOptionsRegistry.RegisterOption<string>('databasename', 'd',
     RS_CMD_DATABASENAME_INFO,
     procedure(const AValue: string)
@@ -60,7 +61,7 @@ begin
     end);
   LOption.Required := True;
 
-  // Option: username
+  // Global option: username
   LOption := TOptionsRegistry.RegisterOption<string>('username', 'u',
     RS_CMD_USERNAME_INFO,
     procedure(const AValue: string)
@@ -69,7 +70,7 @@ begin
     end);
   LOption.Required := True;
 
-  // Option: password
+  // Global option: password
   LOption := TOptionsRegistry.RegisterOption<string>('password', 'p',
     RS_CMD_PASSWORD_INFO,
     procedure(const AValue: string)
@@ -140,7 +141,6 @@ begin
         TStressDBOptions.MeltCPU);
     end);
 
-
   // Operation: Anonymize database
 
   // Command: anonymizedb
@@ -159,6 +159,87 @@ begin
         TGlobalOptions.DatabaseName,
         TGlobalOptions.UserName,
         TGlobalOptions.Password,
+        TGlobalOptions.Verbose);
+    end);
+
+  // Operation: Alter column
+
+  // Command: altercolumn
+  LCommand := TOptionsRegistry.RegisterCommand('altercolumn', 'altercol',
+    RS_CMD_ALTERCOLUMN_DESCRIPTION, RS_CMD_ALTERCOLUMN_INFO,
+    'altercolumn -servername:<name> -databasename:<dbname> -username:<name> ' +
+                '-password:<password> -schemaname:<tableschema> ' +
+                '-tablename:<tablename> -columnname:<columnname> ' +
+                '-columnrename:<columnrename> -datatype:<datatype>');
+  LCommand.Examples.Add('altercolumn -servername:MARCONI ' +
+    '-databasename:AdventureWorks ' +
+    '-username:sgovoni -password:royalbreeze489 -schemaname:Person ' +
+    '-tablename:Person -columnname:FirstName -datatype:nvarchar(100)');
+  LCommand.Examples.Add('altercolumn -s:MARCONI -d:AdventureWorks ' +
+    '-u:sgovoni -p:royalbreeze489 -schema:Person -table:Person ' +
+    '-column:FirstName -type:nvarchar(100)');
+  LCommand.Examples.Add('altercol -s:MARCONI -d:AdventureWorks ' +
+    '-u:sgovoni -p:royalbreeze489 -schema:Person -table:Person ' +
+    '-column:FirstName -type:nvarchar(100)');
+
+  // Option: "schemaname"
+  LOption := LCommand.RegisterOption<string>('schemaname', 'schema',
+    RS_CMD_ALTERCOLUMN_SCHEMANAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAlterColumnOptions.SchemaName := AValue
+    end);
+  LOption.Required := True;
+
+  // Option: "tablename"
+  LOption := LCommand.RegisterOption<string>('tablename', 'table',
+    RS_CMD_ALTERCOLUMN_TABLENAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAlterColumnOptions.TableName := AValue
+    end);
+  LOption.Required := True;
+
+  // Option: "columnname"
+  LOption := LCommand.RegisterOption<string>('columnname', 'column',
+    RS_CMD_ALTERCOLUMN_COLUMNNAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAlterColumnOptions.ColumnName := AValue
+    end);
+  LOption.Required := True;
+
+  // Option: "columnrename"
+  LOption := LCommand.RegisterOption<string>('columnrename', 'columnrename',
+    RS_CMD_ALTERCOLUMN_COLUMNRENAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAlterColumnOptions.ColumnRename := AValue
+    end);
+  LOption.Required := False;
+
+  // Option: "datatype"
+  LOption := LCommand.RegisterOption<string>('datatype', 'type',
+    RS_CMD_ALTERCOLUMN_DATATYPEINFO,
+    procedure(const AValue: string)
+    begin
+      TAlterColumnOptions.DataType := AValue
+    end);
+  LOption.Required := True;
+
+  TCommandHandler.RegisterCommand('altercolumn',
+    procedure()
+    begin
+      TAlterColumn.Run(
+        TGlobalOptions.ServerName,
+        TGlobalOptions.DatabaseName,
+        TGlobalOptions.UserName,
+        TGlobalOptions.Password,
+        TAlterColumnOptions.SchemaName,
+        TAlterColumnOptions.TableName,
+        TAlterColumnOptions.ColumnName,
+        TAlterColumnOptions.ColumnRename,
+        TAlterColumnOptions.DataType,
         TGlobalOptions.Verbose);
     end);
 end;

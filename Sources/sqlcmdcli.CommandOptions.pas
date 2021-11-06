@@ -21,6 +21,15 @@ type
     class var MeltCPU: Boolean;
   end;
 
+  TAlterColumnOptions = class
+  public
+    class var SchemaName: string;
+    class var TableName: string;
+    class var ColumnName: string;
+    class var ColumnRename: string;
+    class var DataType: string;
+  end;
+
   TGlobalOptions = class
   public
     class var ServerName: string;

@@ -6,7 +6,7 @@ program sqlcmdcli;
 {$ENDIF}
 
 //{$R *.res}
-//{$R *.dres}
+{$R *.dres}
 
 uses
   System.SysUtils,
@@ -24,7 +24,8 @@ uses
   sqlcmdcli.StressDB.QueryExecutor in '..\..\Sources\sqlcmdcli.StressDB.QueryExecutor.pas',
   sqlcmdcli.StressDB in '..\..\Sources\sqlcmdcli.StressDB.pas',
   sqlcmdcli.SchemaExtractor in '..\..\Sources\sqlcmdcli.SchemaExtractor.pas',
-  sqlcmdcli.AnonymizeDB in '..\..\Sources\sqlcmdcli.AnonymizeDB.pas';
+  sqlcmdcli.AnonymizeDB in '..\..\Sources\sqlcmdcli.AnonymizeDB.pas',
+  sqlcmdcli.AlterColumn in '..\..\Sources\sqlcmdcli.AlterColumn.pas';
 
 var
   LHeader: string;

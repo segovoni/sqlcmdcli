@@ -1,1 +1,2 @@
 sqlcmdcli TEXT "..\\..\\Resources\\sqlcmdcli.txt"
+sp_alter_column TEXT "..\\..\\Libraries\\sp_alter_column\\source\\sp-alter-column.sql"
