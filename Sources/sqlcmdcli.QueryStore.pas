@@ -64,7 +64,7 @@ begin
 
       // ADO
       LConnection.ConnectionString :=
-        'Provider=SQLNCLI10.1;' +
+        'Provider=SQLNCLI11;' +
         //'Integrated Security="";' +
         'Persist Security Info=False;' +
         //'User ID=' + AUserName + '@' + AServerName + ';' +

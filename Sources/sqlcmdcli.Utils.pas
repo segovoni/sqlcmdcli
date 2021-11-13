@@ -30,6 +30,7 @@ type
     class procedure SQLCharacterMaskFactory(AConnection: TADOConnection);
     class procedure SQLStringReverseFnFactory(AConnection: TADOConnection);
     class procedure SQLStringScramblerFnFactory(AConnection: TADOConnection);
+    class function CheckNativeClient(const AVersion: string): Boolean;
   end;
 
 implementation
@@ -37,7 +38,9 @@ implementation
 uses
   System.Classes
   ,System.SysUtils
-  ,System.StrUtils;
+  ,System.StrUtils
+  ,System.Win.Registry
+  ,Winapi.Windows;
 
 { TResourceUtils }
 
@@ -301,6 +304,22 @@ begin
 
   finally
     FreeAndNil(LQry);
+  end;
+end;
+
+class function TSQLUtils.CheckNativeClient(const AVersion: string): Boolean;
+var
+  LRegistry: TRegistry;
+begin
+  Result := False;
+  LRegistry := TRegistry.Create(KEY_READ);
+  try
+    LRegistry.RootKey := HKEY_LOCAL_MACHINE;
+    // SOFTWARE\Microsoft\Microsoft SQL Server\SQLNCLI11\CurrentVersion
+    if (LRegistry.KeyExists('\SOFTWARE\Microsoft\Microsoft SQL Server\' + AVersion {SQLNCLI11} + '\CurrentVersion\')) then
+      Result := True;
+  finally
+    FreeAndNil(LRegistry);
   end;
 end;
 

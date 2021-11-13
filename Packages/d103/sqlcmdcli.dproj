@@ -112,8 +112,8 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Keys>CompanyName=;FileDescription=Command-line utility for ad hoc, interactive execution of commands on SQL Server;FileVersion=1.0.0.26;InternalName=sqlcmdcli;LegalCopyright=;LegalTrademarks=;OriginalFilename=sqlcmdcli.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=https://github.com/segovoni/sqlcmdcli</VerInfo_Keys>
-        <VerInfo_Build>26</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=Command-line utility for ad hoc, interactive execution of commands on SQL Server;FileVersion=1.0.0.52;InternalName=sqlcmdcli;LegalCopyright=;LegalTrademarks=;OriginalFilename=sqlcmdcli.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=https://github.com/segovoni/sqlcmdcli</VerInfo_Keys>
+        <VerInfo_Build>52</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -136,6 +136,7 @@
         <DCCReference Include="..\..\Sources\sqlcmdcli.SchemaExtractor.pas"/>
         <DCCReference Include="..\..\Sources\sqlcmdcli.AnonymizeDB.pas"/>
         <DCCReference Include="..\..\Sources\sqlcmdcli.AlterColumn.pas"/>
+        <DCCReference Include="..\..\Sources\sqlcmdcli.Constants.pas"/>
         <RcItem Include="..\..\Resources\sqlcmdcli.txt">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>TEXT</ResourceType>
@@ -177,6 +178,18 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="..\..\Resources\sqlcmdcli.txt" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win32\Release\sqlcmdcli.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>sqlcmdcli.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib" Class="DependencyModule">
                     <Platform Name="iOSSimulator">
                         <Overwrite>true</Overwrite>
@@ -193,7 +206,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\Resources\sqlcmdcli.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="..\..\Resources\sqlcmdcli.txt" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\..\Libraries\sp_alter_column\source\sp-alter-column.sql" Configuration="Release" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

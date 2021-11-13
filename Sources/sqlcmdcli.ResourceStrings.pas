@@ -72,6 +72,10 @@ resourcestring
   RS_STATUS_MSG = #13'Processing %d of %d (%d%%)... ';
   RS_QRY_QUERYSTORE_REGRESSION = 'SELECT * FROM dbo.#Tab_A WHERE (Col1 = %d) AND (Col2 = %d)';
 
+  RS_ERROR_SQL_SERVER_NATIVE_CLIENT = 'SQL Server Native Client %s is not installed! ' +
+                                      'Check here to know how to install SQL ' +
+                                      'Server Native Client: https://bit.ly/3wFVJXz';
+
 implementation
 
 end.

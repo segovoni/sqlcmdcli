@@ -25,7 +25,8 @@ uses
   sqlcmdcli.StressDB in '..\..\Sources\sqlcmdcli.StressDB.pas',
   sqlcmdcli.SchemaExtractor in '..\..\Sources\sqlcmdcli.SchemaExtractor.pas',
   sqlcmdcli.AnonymizeDB in '..\..\Sources\sqlcmdcli.AnonymizeDB.pas',
-  sqlcmdcli.AlterColumn in '..\..\Sources\sqlcmdcli.AlterColumn.pas';
+  sqlcmdcli.AlterColumn in '..\..\Sources\sqlcmdcli.AlterColumn.pas',
+  sqlcmdcli.Constants in '..\..\Sources\sqlcmdcli.Constants.pas';
 
 var
   LHeader: string;
@@ -39,6 +40,15 @@ begin
     {$ENDIF}
 
     //TConsole.SetTitle('')
+
+    // Check SQL Server Native Client
+    //if not TSQLUtils.CheckNativeClient(SQL_SERVER_NATIVE_CLIENT_11) then
+    //begin
+    //  ExitCode := 1;
+    //  Writeln;
+    //  Writeln(Format(RS_ERROR_SQL_SERVER_NATIVE_CLIENT, [SQL_SERVER_NATIVE_CLIENT_11]));
+    //  Exit;
+    //end;
 
     // CLI Initialize
     TBootCLI.Boot;
