@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/sgovoni/sqlcmdcli/_apis/build/status/Build-sqlcmdcli?branchName=master)](https://dev.azure.com/sgovoni/sqlcmdcli/_build/latest?definitionId=4&branchName=master)
+
 # sqlcmdcli
 
 sqlcmdcli utility is a command-line utility for ad hoc, interactive execution of commands on SQL Server to simulate specific workloads, anonymize sensitive data and much more.
