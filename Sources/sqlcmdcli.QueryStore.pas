@@ -6,7 +6,7 @@ type
   TQueryStoreWorkload = class(TObject)
   public
     class procedure Run(const AServerName, ADatabaseName, AUserName, APassword: string;
-      AVerbose: Boolean);
+      const APSP, AVerbose: Boolean);
   end;
 
 implementation
@@ -26,12 +26,13 @@ uses
 { TWorkload }
 
 class procedure TQueryStoreWorkload.Run(const AServerName, ADatabaseName, AUserName,
-  APassword: string; AVerbose: Boolean);
+  APassword: string; const APSP, AVerbose: Boolean);
 var
   Li: Integer;
   LRandomInteger: Integer;
   LStopValue: Integer;
   LPct: Integer;
+  LMax: Integer;
   //LFDConnection: TFDConnection;
   //LFDQuery, LFDQueryFreeCache: TFDQuery;
   LConnection: TADOConnection;
@@ -40,6 +41,7 @@ begin
   CoInitialize(nil);
 
   LStopValue := 300000;
+  LMax := 100000;
 
   //LConnection := TFDConnection.Create(nil);
   //LQuery := TFDQuery.Create(nil);
@@ -86,6 +88,9 @@ begin
       if (AVerbose) then
         TConsole.Log(Format(RS_SETUP_DATABASE_BEGIN, [ADatabaseName]), Info, True);
 
+      if (APSP and AVerbose) then
+        TConsole.Log(RS_SETUP_DATABASE_PSP_QUERY_STORE_ENABLED, Info, True);
+
       LQrySetupDB.SQL.Text :=
         'DROP TABLE IF EXISTS dbo.#Tab_A;';
       LQrySetupDB.ExecSQL;
@@ -109,10 +114,34 @@ begin
         'SET NOCOUNT OFF';
       LQrySetupDB.ExecSQL;
 
+      if (APSP) then
+        LMax := 500000;
+
       LQrySetupDB.SQL.Text :=
-        'INSERT INTO dbo.#Tab_A (Col1, Col2) VALUES (1, 1)';
-      for Li := 1 to 100000 do
-        LQrySetupDB.ExecSQL;
+        'WITH InfiniteRows (RowNumber) AS ' +
+        '( ' +
+          'SELECT ' +
+            '1 AS RowNumber ' +
+          'UNION ALL ' +
+          'SELECT ' +
+            'a.RowNumber + 1 AS RowNumber ' +
+          'FROM ' +
+            'InfiniteRows a ' +
+          'WHERE ' +
+            '(a.RowNumber < ' + LMax.ToString + ') ' +
+        ') ' +
+        'INSERT INTO dbo.#Tab_A ' +
+        '(' +
+           'Col1 ' +
+           ',Col2 ' +
+        ') ' +
+        'SELECT ' +
+          '1 AS MyCol1Value ' +
+          ',1 AS MyCol2Value ' +
+        'FROM ' +
+          'InfiniteRows ' +
+        'OPTION (MAXRECURSION 0)';
+      LQrySetupDB.ExecSQL;
 
       LQrySetupDB.SQL.Text :=
         'CREATE INDEX IDX_Tab_A_Col1 ON dbo.#Tab_A (Col1)';
@@ -122,8 +151,17 @@ begin
         'CREATE INDEX IDX_Tab_A_Col2 ON dbo.#Tab_A (Col2)';
       LQrySetupDB.ExecSQL;
 
-      LQuery.SQL.Text := 'ALTER DATABASE CURRENT SET QUERY_STORE CLEAR ALL';
-      LQuery.ExecSQL;
+      if (APSP) then
+      begin
+        LQrySetupDB.SQL.Text := 'ALTER DATABASE CURRENT SET COMPATIBILITY_LEVEL = 150';
+        LQrySetupDB.ExecSQL;
+
+        LQrySetupDB.SQL.Text := 'ALTER DATABASE SCOPED CONFIGURATION SET PARAMETER_SENSITIVE_PLAN_OPTIMIZATION = OFF';
+        LQrySetupDB.ExecSQL;
+      end;
+
+      LQrySetupDB.SQL.Text := 'ALTER DATABASE CURRENT SET QUERY_STORE CLEAR ALL';
+      LQrySetupDB.ExecSQL;
 
       // Clear the Query Store
       if (AVerbose) then
@@ -131,6 +169,21 @@ begin
 
       if (AVerbose) then
         TConsole.Log(Format(RS_SETUP_DATABASE_END, [ADatabaseName]), Info, True);
+
+      if (APSP) then
+      begin
+        LQuery.SQL.Text :=
+          'SELECT * ' +
+          'FROM dbo.#Tab_A ' +
+          'WHERE (Col1= :pCol1) AND (Col2= :pCol2)';
+
+        LQuery.Parameters[0].Value := 33;
+        LQuery.Parameters[1].Value := 33;
+        LQuery.Open;
+        while (not LQuery.Eof) do
+          LQuery.Next;
+        LQuery.Close;
+      end;
 
       for Li := 1 to LStopValue do
       begin
@@ -152,11 +205,14 @@ begin
         //LQuery.Params[0].Value := LRandomInteger;
         //LQuery.Params[1].Value := LRandomInteger;
 
-        if (Random(100) < 2) then
+        if (not APSP) then
         begin
-          LQueryFreeCache.SQL.Text := 'DBCC FREEPROCCACHE';
-          LQueryFreeCache.ExecSQL;
-          //TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) + 'DBCC FREEPROCCACHE', Info);
+          if (Random(100) < 2) then
+          begin
+            LQueryFreeCache.SQL.Text := 'DBCC FREEPROCCACHE';
+            LQueryFreeCache.ExecSQL;
+            //TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) + 'DBCC FREEPROCCACHE', Info);
+          end;
         end;
 
         LQuery.Open;

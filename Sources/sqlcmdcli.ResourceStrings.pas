@@ -7,6 +7,7 @@ resourcestring
   RS_CONNECTION_SUCCESSFULLY = 'Connection to %s establish successfully!';
   RS_SETUP_DATABASE_BEGIN = 'Setup database %s in progress...';
   RS_SETUP_DATABASE_CLEAR_QUERY_STORE = 'The contents of the Query Store for %s have been removed successfully!';
+  RS_SETUP_DATABASE_PSP_QUERY_STORE_ENABLED = 'Parameter Sensitive Plan (PSP) Optimization workload enabled!';
   RS_SETUP_DATABASE_END = 'Setup database %s completed successfully!';
   RS_CMD_VERBOSE_INFO = 'It enables verbose information logging';
   RS_CMD_HELP_DESCRIPTION = 'It displays help about a command';
@@ -22,6 +23,8 @@ resourcestring
   RS_CMD_QSWORKLOAD_DESCRIPTION = 'It starts the execution of the workload';
   RS_CMD_QSWORKLOAD_INFO = 'It starts the execution of the workload that can ' +
     'simulate the regression of a sample query';
+  RS_CMD_QSWORKLOAD_PSPINFO = 'Parameter Sensitive Plan (PSP) Optimization enabled';
+
 
   RS_CMD_STRESSDB_BEGIN = 'Let''s stress the database...';
   RS_CMD_STRESSDB_END = 'Stress database completed successfully!';

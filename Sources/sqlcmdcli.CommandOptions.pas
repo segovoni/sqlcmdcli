@@ -10,10 +10,7 @@ type
 
   TQueryStoreWorkloadOptions = class
   public
-    //class var ServerName: string;
-    //class var DatabaseName: string;
-    //class var UserName: string;
-    //class var Password: string;
+    class var PSP: Boolean;
   end;
 
   TStressDBOptions = class

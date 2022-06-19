@@ -104,9 +104,19 @@ begin
   LCommand := TOptionsRegistry.RegisterCommand('querystoreworkload', 'qsw',
     RS_CMD_QSWORKLOAD_DESCRIPTION, RS_CMD_QSWORKLOAD_INFO,
     'querystoreworkload -servername:<name> -databasename:<dbname> -username:<name> -password:<password>');
-  LCommand.Examples.Add('querystoreworkload -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489');
-  LCommand.Examples.Add('querystoreworkload -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
-  LCommand.Examples.Add('qsw -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+  LCommand.Examples.Add('querystoreworkload -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489 -psp');
+  LCommand.Examples.Add('querystoreworkload -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489 -psp');
+  LCommand.Examples.Add('qsw -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489 -psp');
+
+  // Option: "psp" parameter sensitive plan optimization
+  LOption := LCommand.RegisterOption<Boolean>('psp', 'psp',
+    RS_CMD_QSWORKLOAD_PSPINFO,
+    procedure(const AValue: Boolean)
+    begin
+      TQueryStoreWorkloadOptions.PSP := AValue
+    end);
+  LOption.Required := False;
+  LOption.HasValue := False;
 
   TCommandHandler.RegisterCommand('querystoreworkload',
     procedure()
@@ -116,6 +126,7 @@ begin
         TGlobalOptions.DatabaseName,
         TGlobalOptions.UserName,
         TGlobalOptions.Password,
+        TQueryStoreWorkloadOptions.PSP,
         TGlobalOptions.Verbose);
     end);
 
