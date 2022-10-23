@@ -160,9 +160,18 @@ begin
     'anonymizedb -servername:<name> -databasename:<dbname> -username:<name> ' +
     '-password:<password> -schemaname:<tableschema> -tablename:<tablename> ' +
     '-columnname:<columnname>');
-  LCommand.Examples.Add('anonymizedb -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489');
-  LCommand.Examples.Add('anonymizedb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
-  LCommand.Examples.Add('anondb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+  LCommand.Examples.Add('anonymizedb -servername:MARCONI -databasename:AdventureWorks ' +
+    '-username:sgovoni -password:royalbreeze489');
+  LCommand.Examples.Add('anonymizedb -s:MARCONI -d:AdventureWorks -u:sgovoni ' +
+    '-p:royalbreeze489');
+  LCommand.Examples.Add('anondb -s:MARCONI -d:AdventureWorks -u:sgovoni ' +
+    '-p:royalbreeze489');
+  LCommand.Examples.Add('anonymizedb -servername:MARCONI -databasename:AdventureWorks ' +
+    '-username:sgovoni -password:royalbreeze489 -schemaname:Person -tablename:Address ' +
+    '-columnname:City');
+  LCommand.Examples.Add('anonymizedb -servername:MARCONI -databasename:AdventureWorks ' +
+    '-username:sgovoni -password:royalbreeze489 -schema:Person -table:Address ' +
+    '-column:City');
 
   // Option: "schemaname"
   LOption := LCommand.RegisterOption<string>('schemaname', 'schema',

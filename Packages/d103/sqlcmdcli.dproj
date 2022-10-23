@@ -112,8 +112,8 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Keys>CompanyName=;FileDescription=Command-line utility for ad hoc, interactive execution of commands on SQL Server;FileVersion=1.0.0.77;InternalName=sqlcmdcli;LegalCopyright=;LegalTrademarks=;OriginalFilename=sqlcmdcli.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=https://github.com/segovoni/sqlcmdcli</VerInfo_Keys>
-        <VerInfo_Build>77</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=;FileDescription=Command-line utility for ad hoc, interactive execution of commands on SQL Server;FileVersion=1.0.0.80;InternalName=sqlcmdcli;LegalCopyright=;LegalTrademarks=;OriginalFilename=sqlcmdcli.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0;Comments=https://github.com/segovoni/sqlcmdcli</VerInfo_Keys>
+        <VerInfo_Build>80</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
