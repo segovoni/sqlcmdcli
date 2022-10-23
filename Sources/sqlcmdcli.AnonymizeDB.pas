@@ -22,8 +22,8 @@ type
     class procedure DisableTriggers(const AConnection: TADOConnection;
       const ATriggers: TDictionary<string, string>);
   public
-    class procedure Run(const AServerName, ADatabaseName, AUserName, APassword: string;
-      const AVerbose: Boolean);
+    class procedure Run(const AServerName, ADatabaseName, AUserName, APassword,
+      ASchemaName, ATableName, AColumnName: string; const AVerbose: Boolean);
   end;
 
 implementation
@@ -174,7 +174,7 @@ begin
 end;
 
 class procedure TAnonymizeDB.Run(const AServerName, ADatabaseName, AUserName,
-  APassword: string; const AVerbose: Boolean);
+  APassword, ASchemaName, ATableName, AColumnName: string; const AVerbose: Boolean);
 var
   LConnection: TADOConnection;
   LDBSchema: TDBSchema;
@@ -224,7 +224,24 @@ begin
         if (AVerbose) then
           TConsole.Log(Format('Extract schema for %s ...', [ADatabaseName]), Success, False);
 
-        LDBSchemaExtractor.ExtractSchema(stText);
+        if (Trim(ASchemaName) = '') and
+           (Trim(ATableName) = '') and
+           (Trim(AColumnName) = '') then
+        begin
+          LDBSchemaExtractor.ExtractSchema(stText);
+        end
+        else if (Trim(ASchemaName) <> '') and
+                (Trim(ATableName) <> '') and
+                (Trim(AColumnName) <> '') then
+        begin
+          LDBSchemaExtractor.ExtractSchema(ASchemaName, ATableName, AColumnName);
+        end
+        else begin
+          if (AVerbose) then
+            TConsole.Log('Invalid parametes', Error, True);
+          raise Exception.Create('Invalid parametes');
+        end;
+
         LDBSchema := LDBSchemaExtractor.DBSchema;
         //LDBSchemaIndex := LDBSchemaExtractor.DBSchemaIndex;
       finally

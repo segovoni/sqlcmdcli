@@ -41,6 +41,7 @@ type
     function GetDBSchema: TDBSchema;
     //function GetDBSchemaIndex: TDBSchemaIndex;
     function GetSQLbySchemaType(ASchemaType: TSchemaType): string;
+    function GetSQLbySchema(const ASchemaName, ATableName, AColumnName: string): string;
   protected
     FConnection: TADOConnection;
     FDBSchema: TDBSchema;
@@ -48,7 +49,8 @@ type
   public
     constructor Create(AConnection: TADOConnection);
     destructor Destroy; override;
-    procedure ExtractSchema(ASchemaType: TSchemaType);
+    procedure ExtractSchema(ASchemaType: TSchemaType); overload;
+    procedure ExtractSchema(const ASchemaName, ATableName, AColumnName: string); overload;
     property DBSchema: TDBSchema read GetDBSchema;
     //property DBSchemaIndex: TDBSchemaIndex read GetDBSchemaIndex;
   end;
@@ -76,6 +78,75 @@ begin
   //FreeAndNil(FDBSchemaIndex);
 
   inherited;
+end;
+
+procedure TSQLDBSchemaExtractor.ExtractSchema(const ASchemaName, ATableName,
+  AColumnName: string);
+var
+  LQry: TADOQuery;
+  LCurrentTable: string;
+  LList: TObjectList<TSQLDBTableInfo>;
+begin
+  // Database schema extractor logic
+
+  LQry := TADOQuery.Create(nil);
+  LList := TObjectList<TSQLDBTableInfo>.Create();
+  try
+    LQry.Connection := FConnection;
+    LQry.SQL.Text := GetSQLbySchema(ASchemaName, ATableName, AColumnName);
+    LQry.Open;
+
+    //
+    if not (LQry.Eof) then
+      LCurrentTable :=
+        TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_SCHEMA').AsString) +
+        '.' +
+        TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString);
+
+    while (not LQry.Eof) do
+    begin
+      if CompareText(LCurrentTable,
+                     TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_SCHEMA').AsString) + '.' +
+                     TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString)) = 0 then
+      begin
+        LList.Add(TSQLDBTableInfo.Create(
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_SCHEMA').AsString),
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString),
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('COLUMN_NAME').AsString),
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('DATA_TYPE').AsString),
+          LQry.FieldByName('MAX_LENGHT').AsInteger,
+          LQry.FieldByName('COLUMN_IDENTITY').AsBoolean
+                                         )
+                 )
+      end
+      else begin
+        FDBSchema.Add(LCurrentTable, LList);
+        LList := TObjectList<TSQLDBTableInfo>.Create();
+        LList.Add(TSQLDBTableInfo.Create(
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_SCHEMA').AsString),
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString),
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('COLUMN_NAME').AsString),
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('DATA_TYPE').AsString),
+          LQry.FieldByName('MAX_LENGHT').AsInteger,
+          LQry.FieldByName('COLUMN_IDENTITY').AsBoolean
+                                         )
+                 );
+        LCurrentTable :=
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_SCHEMA').AsString) +
+          '.' +
+          TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString);
+      end;
+
+      LQry.Next;
+    end;
+
+    FDBSchema.Add(TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_SCHEMA').AsString) +
+                                                 '.' +
+                                                 TSQLObjectNameFormatter.Format(LQry.FieldByName('TABLE_NAME').AsString), LList);
+
+  finally
+    FreeAndNil(LQry);
+  end;
 end;
 
 procedure TSQLDBSchemaExtractor.ExtractSchema(ASchemaType: TSchemaType);
@@ -167,6 +238,42 @@ end;
 function TSQLDBSchemaExtractor.GetDBSchema: TDictionary<string, TOBjectList<TSQLDBTableInfo>>;
 begin
   Result := FDBSchema;
+end;
+
+function TSQLDBSchemaExtractor.GetSQLbySchema(const ASchemaName, ATableName,
+  AColumnName: string): string;
+begin
+  Result :=
+    'SELECT ' +
+      'TABLE_SCHEMA = SCHEMA_NAME(T.schema_id) ' +
+      ',TABLE_NAME = T.name ' +
+      ',ORDINAL_POSITION = C.column_id ' +
+      ',COLUMN_NAME = C.name ' +
+      ',MAX_LENGHT = C.max_length ' +
+      ',DATA_TYPE = TYPE_NAME(C.system_type_id) ' +
+      ',COLUMN_IDENTITY = C.is_identity ' +
+      //',ROWS = P.rows ' +
+    'FROM ' +
+      'sys.tables AS T ' +
+    'JOIN ' +
+      'sys.columns AS C ON T.object_id=C.object_id ' +
+    //'JOIN ' +
+    //  'sys.partitions AS P on P.object_id=T.object_id ' +
+    'WHERE ' +
+      '(T.type = ''U'') ' +
+      //'AND (T.is_memory_optimized = 0) ' +
+      'AND (T.is_ms_shipped = 0) ' +
+      'AND (T.temporal_type = 0) ' +
+      'AND (T.is_replicated = 0) ' +
+      'AND (C.is_computed = 0) ' +
+      'AND (SCHEMA_NAME(T.schema_id) = ''' + ASchemaName + ''') ' +
+      'AND (T.name = ''' + ATableName + ''') ' +
+      'AND (C.name = ''' + AColumnName + ''') ' +
+    'ORDER BY ' +
+      'TABLE_SCHEMA ' +
+      ',TABLE_NAME ' +
+      ',COLUMN_NAME ' +
+      ',ORDINAL_POSITION';
 end;
 
 function TSQLDBSchemaExtractor.GetSQLbySchemaType(ASchemaType: TSchemaType): string;

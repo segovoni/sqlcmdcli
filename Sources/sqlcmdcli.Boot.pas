@@ -157,10 +157,39 @@ begin
   // Command: anonymizedb
   LCommand := TOptionsRegistry.RegisterCommand('anonymizedb', 'anondb',
     RS_CMD_ANONYMIZEDB_DESCRIPTION, RS_CMD_ANONYMIZEDB_INFO,
-    'anonymizedb -servername:<name> -databasename:<dbname> -username:<name> -password:<password>');
+    'anonymizedb -servername:<name> -databasename:<dbname> -username:<name> ' +
+    '-password:<password> -schemaname:<tableschema> -tablename:<tablename> ' +
+    '-columnname:<columnname>');
   LCommand.Examples.Add('anonymizedb -servername:MARCONI -databasename:AdventureWorks -username:sgovoni -password:royalbreeze489');
   LCommand.Examples.Add('anonymizedb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
   LCommand.Examples.Add('anondb -s:MARCONI -d:AdventureWorks -u:sgovoni -p:royalbreeze489');
+
+  // Option: "schemaname"
+  LOption := LCommand.RegisterOption<string>('schemaname', 'schema',
+    RS_CMD_ANONYMIZEDB_SCHEMANAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAnonymizeDBOptions.SchemaName := AValue
+    end);
+  LOption.Required := False;
+
+  // Option: "tablename"
+  LOption := LCommand.RegisterOption<string>('tablename', 'table',
+    RS_CMD_ANONYMIZEDB_TABLENAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAnonymizeDBOptions.TableName := AValue
+    end);
+  LOption.Required := False;
+
+  // Option: "columnname"
+  LOption := LCommand.RegisterOption<string>('columnname', 'column',
+    RS_CMD_ANONYMIZEDB_COLUMNNAMEINFO,
+    procedure(const AValue: string)
+    begin
+      TAnonymizeDBOptions.ColumnName := AValue
+    end);
+  LOption.Required := False;
 
   TCommandHandler.RegisterCommand('anonymizedb',
     procedure()
@@ -170,6 +199,9 @@ begin
         TGlobalOptions.DatabaseName,
         TGlobalOptions.UserName,
         TGlobalOptions.Password,
+        TAnonymizeDBOptions.SchemaName,
+        TAnonymizeDBOptions.TableName,
+        TAnonymizeDBOptions.ColumnName,
         TGlobalOptions.Verbose);
     end);
 

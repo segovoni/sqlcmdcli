@@ -27,6 +27,13 @@ type
     class var DataType: string;
   end;
 
+  TAnonymizeDBOptions = class
+  public
+    class var SchemaName: string;
+    class var TableName: string;
+    class var ColumnName: string;
+  end;
+
   TGlobalOptions = class
   public
     class var ServerName: string;
