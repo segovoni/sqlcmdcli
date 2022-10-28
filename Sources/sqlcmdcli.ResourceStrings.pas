@@ -81,6 +81,9 @@ resourcestring
   RS_ERROR_SQL_SERVER_NATIVE_CLIENT = 'SQL Server Native Client %s is not installed! ' +
                                       'Check here to know how to install SQL ' +
                                       'Server Native Client: https://bit.ly/3wFVJXz';
+  RS_THANKS_FOR_USING = 'Thanks for using sqlcmdcli https://github.com/segovoni/sqlcmdcli';
+  RS_COMMIT_TRANSACTION = 'The transaction has been committed!';
+  RS_ROLLBACK_TRANSACTION = 'The transaction has been rejected!';
 
 implementation
 

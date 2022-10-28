@@ -348,7 +348,7 @@ begin
                     'AND (' + LSQLDBTableInfo.ColumnName + '<>'''')';
 
               if (AVerbose) then
-                TConsole.Log(LQry.SQL.Text, Success, True);
+                TConsole.Log(LQry.SQL.Text, Info, True);
 
               LQry.ExecSQL;
             end;
@@ -379,13 +379,16 @@ begin
       TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_TR_END, Success, True);
 
       LConnection.CommitTrans;
-      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_END, [ADatabaseName]), Success, False);
+      TConsole.Log(Format(RS_COMMIT_TRANSACTION, [ADatabaseName]), Success, True);
+      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_END, [ADatabaseName]), Success, True);
     except
-      on E: Exception do begin
-        LConnection.RollbackTrans;
-        //Writeln(E.ClassName, ': ', E.Message);
-        TConsole.Log(E.ClassName + ': ' + E.Message, Error, True);
-      end;
+      on E: Exception do
+        begin
+          if (LConnection.InTransaction) then
+            LConnection.RollbackTrans;
+          TConsole.Log(E.ClassName + ': ' + E.Message, Error, True);
+          TConsole.Log(Format(RS_ROLLBACK_TRANSACTION, [ADatabaseName]), Warning, True);
+        end;
     end;
 
   finally
@@ -394,7 +397,6 @@ begin
     FreeAndNil(LConnection);
     FreeAndNil(LTableList);
   end;
-
 end;
 
 end.

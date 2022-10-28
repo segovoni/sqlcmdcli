@@ -74,13 +74,15 @@ begin
     end;
 
     TCommandHandler.ExecuteCommand(LParseResult.Command);
-
-    Readln;
+    TConsole.Log(RS_THANKS_FOR_USING, Info, True);
+    Exit;
   except
-      on E: Exception do
+    on E: Exception do
       begin
         Writeln(E.ClassName, ': ', E.Message);
         ExitCode := 1;
+        TConsole.Log(RS_THANKS_FOR_USING, Info, True);
+        Exit
       end;
   end;
 end.
