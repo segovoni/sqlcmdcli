@@ -189,7 +189,7 @@ begin
       begin
         LRandomInteger := Random(100);
         LPct := Trunc((Li * 1.0 / LStopValue) * 100);
-        TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) +
+        TConsole.Log(Format(RS_STATUS_PROCESS, [Li, LStopValue, LPct]) +
                      Format(RS_QRY_QUERYSTORE_REGRESSION, [LRandomInteger, LRandomInteger]), Info, False);
 
         LQuery.SQL.Text :=

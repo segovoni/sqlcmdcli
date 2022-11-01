@@ -222,7 +222,7 @@ begin
       try
         // Perform extract schema
         if (AVerbose) then
-          TConsole.Log(Format('Extract schema for %s ...', [ADatabaseName]), Success, False);
+          TConsole.Log(Format('Extract schema for %s...', [ADatabaseName]), Success, False);
 
         LDBSchemaExtractor.ExtractSchema(stText, ASchemaName, ATableName, AColumnName);
 
@@ -283,10 +283,10 @@ begin
       begin
         LPct := Trunc((Li * 1.0 / (LStopValue)) * 100);
         if (AVerbose) then
-          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]) + LTableName,
+          TConsole.Log(Format(RS_STATUS_PROCESS_TABLE, [Li, LStopValue, LPct]) + LTableName,
             Info, True)
         else
-          TConsole.Log(Format(RS_STATUS_MSG, [Li, LStopValue, LPct]),
+          TConsole.Log(Format(RS_STATUS_PROCESS_TABLE, [Li, LStopValue, LPct]),
             Info, True);
 
         LDBSchema.TryGetValue(LTableName, LListSQLDBTableInfo);
@@ -332,7 +332,7 @@ begin
                     'AND (' + LSQLDBTableInfo.ColumnName + '<>'''')';
 
               if (AVerbose) then
-                TConsole.Log(LQry.SQL.Text, Info, True);
+                TConsole.Log(LQry.SQL.Text, Default, True);
 
               LQry.ExecSQL;
             end;
