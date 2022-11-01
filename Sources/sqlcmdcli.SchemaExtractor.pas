@@ -40,8 +40,8 @@ type
   private
     function GetDBSchema: TDBSchema;
     //function GetDBSchemaIndex: TDBSchemaIndex;
-    function GetSQLbySchemaType(ASchemaType: TSchemaType): string;
-    function GetSQLbySchema(const ASchemaName, ATableName, AColumnName: string): string;
+    function GetSQLbySchemaType(ASchemaType: TSchemaType; const ASchemaName, ATableName, AColumnName: string): string;
+    //function GetSQLbySchema(const ASchemaName, ATableName, AColumnName: string): string;
   protected
     FConnection: TADOConnection;
     FDBSchema: TDBSchema;
@@ -49,8 +49,8 @@ type
   public
     constructor Create(AConnection: TADOConnection);
     destructor Destroy; override;
-    procedure ExtractSchema(ASchemaType: TSchemaType); overload;
-    procedure ExtractSchema(const ASchemaName, ATableName, AColumnName: string); overload;
+    procedure ExtractSchema(ASchemaType: TSchemaType; const ASchemaName, ATableName, AColumnName: string);
+    //procedure ExtractSchema(const ASchemaName, ATableName, AColumnName: string); overload;
     property DBSchema: TDBSchema read GetDBSchema;
     //property DBSchemaIndex: TDBSchemaIndex read GetDBSchemaIndex;
   end;
@@ -80,6 +80,7 @@ begin
   inherited;
 end;
 
+{
 procedure TSQLDBSchemaExtractor.ExtractSchema(const ASchemaName, ATableName,
   AColumnName: string);
 var
@@ -148,8 +149,10 @@ begin
     FreeAndNil(LQry);
   end;
 end;
+}
 
-procedure TSQLDBSchemaExtractor.ExtractSchema(ASchemaType: TSchemaType);
+procedure TSQLDBSchemaExtractor.ExtractSchema(ASchemaType: TSchemaType;
+  const ASchemaName, ATableName, AColumnName: string);
 var
   LQry: TADOQuery;
   //LColumn: TSQLDBTableInfo;
@@ -165,7 +168,7 @@ begin
   //LIndex := 0;
   try
     LQry.Connection := FConnection;
-    LQry.SQL.Text := GetSQLbySchemaType(ASchemaType);
+    LQry.SQL.Text := GetSQLbySchemaType(ASchemaType, ASchemaName, ATableName, AColumnName);
     LQry.Open;
 
     //
@@ -240,6 +243,7 @@ begin
   Result := FDBSchema;
 end;
 
+{
 function TSQLDBSchemaExtractor.GetSQLbySchema(const ASchemaName, ATableName,
   AColumnName: string): string;
 begin
@@ -275,8 +279,12 @@ begin
       ',COLUMN_NAME ' +
       ',ORDINAL_POSITION';
 end;
+}
 
-function TSQLDBSchemaExtractor.GetSQLbySchemaType(ASchemaType: TSchemaType): string;
+function TSQLDBSchemaExtractor.GetSQLbySchemaType(ASchemaType: TSchemaType;
+  const ASchemaName, ATableName, AColumnName: string): string;
+var
+  LSQL: string;
 begin
   if (ASchemaType = stFull) then
     Result :=
@@ -308,7 +316,8 @@ begin
         ',COLUMN_NAME ' +
         ',ORDINAL_POSITION'
   else if (ASchemaType = stText) then
-    Result :=
+  begin
+    LSQL :=
       'SELECT ' +
         'TABLE_SCHEMA = SCHEMA_NAME(T.schema_id) ' +
         ',TABLE_NAME = T.name ' +
@@ -328,13 +337,33 @@ begin
         'AND (T.temporal_type = 0) ' +
         'AND (T.is_replicated = 0) ' +
         'AND (C.is_computed = 0) ' +
-        'AND TYPE_NAME(C.system_type_id) IN (''char'', ''nchar'', ''varchar'', ''nvarchar'', ''text'', ''ntext'') ' +
+        'AND TYPE_NAME(C.system_type_id) IN ' +
+          '(''char'', ''nchar'', ''varchar'', ''nvarchar'', ''text'', ''ntext'') ';
+
+    if (Trim(ASchemaName) <> '') then
+      LSQL := LSQL +
+        'AND (SCHEMA_NAME(T.schema_id) = ''' + ASchemaName + ''') ';
+
+    if (Trim(ATableName) <> '') then
+      LSQL := LSQL +
+        'AND (T.name = ''' + ATableName + ''') ';
+
+    if (Trim(AColumnName) <> '') then
+      LSQL := LSQL +
+        'AND (C.name = ''' + AColumnName + ''') ';
+
+    LSQL := LSQL +
       'ORDER BY ' +
         'TABLE_SCHEMA ' +
         ',TABLE_NAME ' +
-        ',ORDINAL_POSITION'
-  else
+        ',ORDINAL_POSITION';
+
+    Result := LSQL;
+  end
+  else begin
     Result := '';
+    raise Exception.Create('Unrecognized schema type');
+  end;
 end;
 
 //function TSQLDBSchemaExtractor.GetDBSchemaIndex: TDBSchemaIndex;

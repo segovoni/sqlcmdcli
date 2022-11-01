@@ -224,23 +224,7 @@ begin
         if (AVerbose) then
           TConsole.Log(Format('Extract schema for %s ...', [ADatabaseName]), Success, False);
 
-        if (Trim(ASchemaName) = '') and
-           (Trim(ATableName) = '') and
-           (Trim(AColumnName) = '') then
-        begin
-          LDBSchemaExtractor.ExtractSchema(stText);
-        end
-        else if (Trim(ASchemaName) <> '') and
-                (Trim(ATableName) <> '') and
-                (Trim(AColumnName) <> '') then
-        begin
-          LDBSchemaExtractor.ExtractSchema(ASchemaName, ATableName, AColumnName);
-        end
-        else begin
-          if (AVerbose) then
-            TConsole.Log('Invalid parametes', Error, True);
-          raise Exception.Create('Invalid parametes');
-        end;
+        LDBSchemaExtractor.ExtractSchema(stText, ASchemaName, ATableName, AColumnName);
 
         LDBSchema := LDBSchemaExtractor.DBSchema;
         //LDBSchemaIndex := LDBSchemaExtractor.DBSchemaIndex;
