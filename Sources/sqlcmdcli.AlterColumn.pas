@@ -58,12 +58,12 @@ begin
       LQry.ParamCheck := False;
       LConnection.BeginTrans;
 
-      TConsole.Log(Format(RS_CONNECTION_SUCCESSFULLY, [AServerName]), Success, True);
+      TConsole.Log(True, Format(RS_CONNECTION_SUCCESSFULLY, [AServerName]),
+        Success, True);
 
       // Let's go!
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ALTERCOLUMN_BEGIN, [AColumnName, ATableName, ADatabaseName]),
-          Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ALTERCOLUMN_BEGIN, [AColumnName, ATableName, ADatabaseName]),
+        Success, True);
 
       LQry.SQL.Text :=
         'IF (OBJECT_ID(''dbo.sp_alter_column'', ''P'') IS NOT NULL) ' +
@@ -110,11 +110,11 @@ begin
       LQry.ExecSQL;
 
       LConnection.CommitTrans;
-      TConsole.Log(Format(RS_CMD_ALTERCOLUMN_END, [AColumnName]), Success, True);
+      TConsole.Log(True, Format(RS_CMD_ALTERCOLUMN_END, [AColumnName]), Success, True);
     except
       on E: Exception do begin
         LConnection.RollbackTrans;
-        TConsole.Log(E.ClassName + ': ' + E.Message, Error, True);
+        TConsole.Log(True, E.ClassName + ': ' + E.Message, Error, True);
       end;
     end;
 

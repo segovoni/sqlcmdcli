@@ -46,7 +46,7 @@ var
   LQry: TADOQuery;
 begin
   // Let's stress the DB!
-  TConsole.Log(RS_CMD_STRESSDB_BEGIN, Success, True);
+  TConsole.Log(True, RS_CMD_STRESSDB_BEGIN, Success, True);
 
   LQry := TADOQuery.Create(nil);
   TADODataSet(LQry).CommandTimeOut := 300;
@@ -57,14 +57,14 @@ begin
     begin
       LQry.SQL.Text :=
         'SELECT * FROM ' + LTableName;
-      TConsole.Log(LQry.SQL.Text, Success, False);
+      TConsole.Log(True, LQry.SQL.Text, Success, False);
       LQry.Open;
       LQry.RecordCount;
       LQry.Last;
       //Sleep(2000);
       LQry.Close;
     end;
-    TConsole.Log(RS_CMD_STRESSDB_END, Success, False);
+    TConsole.Log(True, RS_CMD_STRESSDB_END, Success, False);
 
   finally
     FreeAndNil(LQry);

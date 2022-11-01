@@ -77,19 +77,21 @@ begin
         'Initial File Name="";' +
         'Server SPN=""';
       LConnection.Connected := True;
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CONNECTION_SUCCESSFULLY, [AServerName]), Success, True);
+
+      TConsole.Log(AVerbose, Format(RS_CONNECTION_SUCCESSFULLY, [AServerName]),
+        Success, True);
 
       LQuery.Connection := LConnection;
       LQueryFreeCache.Connection := LConnection;
       LQrySetupDB.Connection := LConnection;
 
       // Setup database
-      if (AVerbose) then
-        TConsole.Log(Format(RS_SETUP_DATABASE_BEGIN, [ADatabaseName]), Info, True);
+      TConsole.Log(AVerbose, Format(RS_SETUP_DATABASE_BEGIN, [ADatabaseName]),
+        Info, True);
 
-      if (APSP and AVerbose) then
-        TConsole.Log(RS_SETUP_DATABASE_PSP_QUERY_STORE_ENABLED, Info, True);
+      if (APSP) then
+        TConsole.Log(AVerbose, RS_SETUP_DATABASE_PSP_QUERY_STORE_ENABLED,
+          Info, True);
 
       LQrySetupDB.SQL.Text :=
         'DROP TABLE IF EXISTS dbo.#Tab_A;';
@@ -164,11 +166,10 @@ begin
       LQrySetupDB.ExecSQL;
 
       // Clear the Query Store
-      if (AVerbose) then
-        TConsole.Log(Format(RS_SETUP_DATABASE_CLEAR_QUERY_STORE, [ADatabaseName]), Info, True);
-
-      if (AVerbose) then
-        TConsole.Log(Format(RS_SETUP_DATABASE_END, [ADatabaseName]), Info, True);
+      TConsole.Log(AVerbose, Format(RS_SETUP_DATABASE_CLEAR_QUERY_STORE, [ADatabaseName]),
+        Info, True);
+      TConsole.Log(AVerbose, Format(RS_SETUP_DATABASE_END, [ADatabaseName]),
+        Info, True);
 
       if (APSP) then
       begin
@@ -189,8 +190,9 @@ begin
       begin
         LRandomInteger := Random(100);
         LPct := Trunc((Li * 1.0 / LStopValue) * 100);
-        TConsole.Log(Format(RS_STATUS_PROCESS, [Li, LStopValue, LPct]) +
-                     Format(RS_QRY_QUERYSTORE_REGRESSION, [LRandomInteger, LRandomInteger]), Info, False);
+        TConsole.Log(True, Format(RS_STATUS_PROCESS, [Li, LStopValue, LPct]) +
+                           Format(RS_QRY_QUERYSTORE_REGRESSION, [LRandomInteger, LRandomInteger]),
+          Info, False);
 
         LQuery.SQL.Text :=
           'SELECT * ' +

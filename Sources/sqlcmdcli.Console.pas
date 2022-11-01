@@ -34,8 +34,8 @@ type
     class procedure SetForegroundColor(const AValue: TConsoleForegroundColor);
     //class procedure SetBackgroundColor(const AValue: TConsoleBackgroundColor);
     class procedure SetTitle(const AValue: string);
-    class procedure Log(const AMessage: string; AState: TConsoleState;
-      const ANewLine: Boolean);
+    class procedure Log(AVerbose: Boolean; const AMessage: string;
+      AState: TConsoleState; const ANewLine: Boolean);
   end;
 
 implementation
@@ -66,35 +66,38 @@ begin
   SetConsoleTitle(PChar(AValue));
 end;
 
-class procedure TConsole.Log(const AMessage: string; AState: TConsoleState;
-  const ANewLine: Boolean);
+class procedure TConsole.Log(AVerbose: Boolean; const AMessage: string;
+  AState: TConsoleState; const ANewLine: Boolean);
 var
   LConOut: THandle;
   LBufInfo: TConsoleScreenBufferInfo;
 begin
-  // Get console screen buffer handle
-  LConOut := TTextRec(Output).Handle;
+  if (AVerbose) then
+  begin
+    // Get console screen buffer handle
+    LConOut := TTextRec(Output).Handle;
 
-  // Save current text attributes
-  GetConsoleScreenBufferInfo(LConOut, LBufInfo);
+    // Save current text attributes
+    GetConsoleScreenBufferInfo(LConOut, LBufInfo);
 
-  case AState of
-    Default:   SetConsoleTextAttribute(FConOut, FBufInfo.wAttributes);
-    Info: SetForegroundColor(AquaForeground);
-    Success: SetForegroundColor(GreenForeground);
-    Warning: SetForegroundColor(RedForeground);
-    Error: SetForegroundColor(RedForeground);
-  else
-    SetForegroundColor(BlackForeground);
+    case AState of
+      Default:   SetConsoleTextAttribute(FConOut, FBufInfo.wAttributes);
+      Info: SetForegroundColor(AquaForeground);
+      Success: SetForegroundColor(GreenForeground);
+      Warning: SetForegroundColor(RedForeground);
+      Error: SetForegroundColor(RedForeground);
+    else
+      SetForegroundColor(BlackForeground);
+    end;
+
+    if ANewLine then
+      Writeln(AMessage)
+    else
+      Write(AMessage);
+
+    // Reset to defaults
+    SetConsoleTextAttribute(LConOut, LBufInfo.wAttributes);
   end;
-
-  if ANewLine then
-    Writeln(AMessage)
-  else
-    Write(AMessage);
-
-  // Reset to defaults
-  SetConsoleTextAttribute(LConOut, LBufInfo.wAttributes);
 end;
 
 end.

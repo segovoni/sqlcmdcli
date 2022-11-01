@@ -215,14 +215,14 @@ begin
     try  // except
       LConnection.Connected := True;
 
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CONNECTION_SUCCESSFULLY, [AServerName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CONNECTION_SUCCESSFULLY, [AServerName]),
+        Success, True);
 
       LDBSchemaExtractor := TSQLDBSchemaExtractor.Create(LConnection);
       try
         // Perform extract schema
-        if (AVerbose) then
-          TConsole.Log(Format('Extract schema for %s...', [ADatabaseName]), Success, False);
+        TConsole.Log(AVerbose, Format('Extract schema for %s...', [ADatabaseName]),
+          Success, False);
 
         LDBSchemaExtractor.ExtractSchema(stText, ASchemaName, ATableName, AColumnName);
 
@@ -232,11 +232,11 @@ begin
         FreeAndNil(LDBSchemaExtractor);
       end;
 
-      if (AVerbose) then
-        TConsole.Log('Done!', Success, True);
+      TConsole.Log(AVerbose, 'Done!', Success, True);
 
       // Let's anonymize data!
-      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_BEGIN, [ADatabaseName]), Success, True);
+      TConsole.Log(True, Format(RS_CMD_ANONYMIZEDB_BEGIN, [ADatabaseName]),
+        Success, True);
 
       LConnection.BeginTrans;
 
@@ -249,19 +249,19 @@ begin
       LFK := TSQLUtils.GetForeignKeyOnTextColumns(LConnection);
 
       // Disable foreign key constraints
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ANONYMIZEDB_DISABLE_FK_START, [ADatabaseName]),
+        Success, True);
       DisableForeignKeyConstraints(LConnection, LFK);
-      TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_FK_END, Success, True);
+      TConsole.Log(True, RS_CMD_ANONYMIZEDB_DISABLE_FK_END, Success, True);
 
       // Retrive check constraints on text columns
       LCHK := TSQLUtils.GetCheckConstraintOnTextColumns(LConnection);
 
       // Disable check constraints
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_CHK_START, [ADatabaseName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ANONYMIZEDB_DISABLE_CHK_START, [ADatabaseName]),
+        Success, True);
       DisableCheckConstraints(LConnection, LCHK);
-      TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_CHK_END, Success, True);
+      TConsole.Log(True, RS_CMD_ANONYMIZEDB_DISABLE_CHK_END, Success, True);
 
       for LTableName in LDBSchema.Keys do
         LTableList.Add(LTableName, LTableName);
@@ -271,10 +271,10 @@ begin
       LTREnable := TSQLUtils.GetStateTriggerStatements(LConnection, LTableList, True);
 
       // Disable triggers
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_DISABLE_TR_START, [ADatabaseName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ANONYMIZEDB_DISABLE_TR_START, [ADatabaseName]),
+        Success, True);
       DisableTriggers(LConnection, LTRDisable);
-      TConsole.Log(RS_CMD_ANONYMIZEDB_DISABLE_TR_END, Success, True);
+      TConsole.Log(True, RS_CMD_ANONYMIZEDB_DISABLE_TR_END, Success, True);
 
       // Anonymization logic
       LStopValue := LDBSchema.Keys.Count;
@@ -283,10 +283,10 @@ begin
       begin
         LPct := Trunc((Li * 1.0 / (LStopValue)) * 100);
         if (AVerbose) then
-          TConsole.Log(Format(RS_STATUS_PROCESS_TABLE, [Li, LStopValue, LPct]) + LTableName,
+          TConsole.Log(True, Format(RS_STATUS_PROCESS_TABLE, [Li, LStopValue, LPct]) + LTableName,
             Info, True)
         else
-          TConsole.Log(Format(RS_STATUS_PROCESS_TABLE, [Li, LStopValue, LPct]),
+          TConsole.Log(True, Format(RS_STATUS_PROCESS_TABLE, [Li, LStopValue, LPct]),
             Info, True);
 
         LDBSchema.TryGetValue(LTableName, LListSQLDBTableInfo);
@@ -331,8 +331,7 @@ begin
                   'WHERE (' + LSQLDBTableInfo.ColumnName + ' IS NOT NULL) ' +
                     'AND (' + LSQLDBTableInfo.ColumnName + '<>'''')';
 
-              if (AVerbose) then
-                TConsole.Log(LQry.SQL.Text, Default, True);
+              TConsole.Log(AVerbose, LQry.SQL.Text, Default, True);
 
               LQry.ExecSQL;
             end;
@@ -345,33 +344,33 @@ begin
       end;
 
       // Enable foreign key constraints
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ANONYMIZEDB_ENABLE_FK_START, [ADatabaseName]),
+        Success, True);
       EnableForeignKeyConstraints(LConnection, LFK);
-      TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_FK_END, Success, True);
+      TConsole.Log(True, RS_CMD_ANONYMIZEDB_ENABLE_FK_END, Success, True);
 
       // Enable check constraints
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_CHK_START, [ADatabaseName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ANONYMIZEDB_ENABLE_CHK_START, [ADatabaseName]),
+        Success, True);
       EnableCheckConstraints(LConnection, LCHK);
-      TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_CHK_END, Success, True);
+      TConsole.Log(True, RS_CMD_ANONYMIZEDB_ENABLE_CHK_END, Success, True);
 
       // Enable triggers
-      if (AVerbose) then
-        TConsole.Log(Format(RS_CMD_ANONYMIZEDB_ENABLE_TR_START, [ADatabaseName]), Success, True);
+      TConsole.Log(AVerbose, Format(RS_CMD_ANONYMIZEDB_ENABLE_TR_START, [ADatabaseName]),
+        Success, True);
       EnableTriggers(LConnection, LTREnable);
-      TConsole.Log(RS_CMD_ANONYMIZEDB_ENABLE_TR_END, Success, True);
+      TConsole.Log(True, RS_CMD_ANONYMIZEDB_ENABLE_TR_END, Success, True);
 
       LConnection.CommitTrans;
-      TConsole.Log(Format(RS_COMMIT_TRANSACTION, [ADatabaseName]), Success, True);
-      TConsole.Log(Format(RS_CMD_ANONYMIZEDB_END, [ADatabaseName]), Success, True);
+      TConsole.Log(True, Format(RS_COMMIT_TRANSACTION, [ADatabaseName]), Success, True);
+      TConsole.Log(True, Format(RS_CMD_ANONYMIZEDB_END, [ADatabaseName]), Success, True);
     except
       on E: Exception do
         begin
           if (LConnection.InTransaction) then
             LConnection.RollbackTrans;
-          TConsole.Log(E.ClassName + ': ' + E.Message, Error, True);
-          TConsole.Log(Format(RS_ROLLBACK_TRANSACTION, [ADatabaseName]), Warning, True);
+          TConsole.Log(True, E.ClassName + ': ' + E.Message, Error, True);
+          TConsole.Log(True, Format(RS_ROLLBACK_TRANSACTION, [ADatabaseName]), Warning, True);
         end;
     end;
 
