@@ -307,7 +307,7 @@ begin
         '(T.type = ''U'') ' +
         //'AND (T.is_memory_optimized = 0) ' +
         'AND (T.is_ms_shipped = 0) ' +
-        'AND (T.temporal_type = 0) ' +
+        //'AND (T.temporal_type = 0) ' +
         'AND (T.is_replicated = 0) ' +
         'AND (C.is_computed = 0) ' +
       'ORDER BY ' +
@@ -334,7 +334,7 @@ begin
         '(T.type = ''U'') ' +
         //'AND (T.is_memory_optimized = 0) ' +
         'AND (T.is_ms_shipped = 0) ' +
-        'AND (T.temporal_type = 0) ' +
+        //'AND (T.temporal_type = 0) ' +
         'AND (T.is_replicated = 0) ' +
         'AND (C.is_computed = 0) ' +
         'AND TYPE_NAME(C.system_type_id) IN ' +
