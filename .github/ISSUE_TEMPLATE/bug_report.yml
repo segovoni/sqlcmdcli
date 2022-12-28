@@ -18,6 +18,15 @@ body:
     validations:
       required: false
   - type: textarea
+    id: command-line
+    attributes:
+      label: sqlcmdcli command line
+      description: What is the command line you used?
+      placeholder: Command line without user credentials!
+      value: "altercolumn -servername:BEER -databasename:AdventureWorks2017 -username:XXX -password:XXX -schemaname:Person -tablename:Person -columnname:FirstName -datatype:nvarchar(100) -verbose"
+    validations:
+      required: true
+  - type: textarea
     id: what-happened
     attributes:
       label: What happened?
@@ -38,7 +47,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: sqlserverversion
+    id: sql-server-version
     attributes:
       label: What SQL Server version are you seeing the problem on?
       multiple: true
