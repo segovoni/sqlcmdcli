@@ -66,3 +66,8 @@ body:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
+  - type: textarea
+    id: more
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
